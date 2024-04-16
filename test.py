@@ -46,24 +46,27 @@ class Serverhandler:
 
 
 
-            print("client added... -> number of clients:", self.number_of_clients)
+            #print("client added... -> number of clients:", self.number_of_clients)
 
-            ch = ClientHandler(client_socket, client_address, self.number_of_clients, self.img.tobytes(), size)
+            ch = ClientHandler(client_socket, client_address, self.number_of_clients, self.img.tobytes(), size, self.img)
             self.clients.append(ch)
 
-            # if self.number_of_clients >= 4:
-            #     ch.send_coordinates(self)
             parts = diller(self.img.width, self.number_of_clients)
 
-            for i in range(self.number_of_clients):
-                ch.my_part = parts[i]
+            if self.number_of_clients >= 4:
+                for i in range(self.number_of_clients-1):
+                    self.clients[i].my_part = parts[i]
+                    self.clients[i].was_change = True
+
+
+            ch.my_part = parts[self.number_of_clients-1]
 
             client_t = threading.Thread(target=ch.handler, daemon=True)
             client_t.start()
 
 
 class ClientHandler:
-    def __init__(self, client_socket, client_address, client_id, image_chunks, size):
+    def __init__(self, client_socket, client_address, client_id, image_chunks, size, img):
         self.s = client_socket
         self.protocol = Protocol(client_socket)
         self.client_address = client_address
@@ -72,38 +75,43 @@ class ClientHandler:
         #self.image = image
         self.image_chunks = image_chunks
         self.size = size
+        self.img = img
+        self.was_change = False
 
     def handler(self):
         input_path = "stitched_image_without_pillow2.png"
         self.send_image()
         self.send_coordinates(input_path)
-        print(f"Sending image to {self.client_address}")
+        #print(f"Sending image to {self.client_address}")
 
-        time.sleep(1)
+
+        while True:
+            if self.was_change:
+                self.send_coordinates(input_path)
+                self.was_change = False
 
         self.s.close()
         print(f"Connection from {self.client_address} closed")
 
     def send_coordinates(self, input_path):
-        print("number of clients:")
+        #print("number of clients:")
         starting_point = self.my_part[0]
         ending_point = self.my_part[1]
         coordinates = (starting_point, ending_point)
-        print(coordinates, "works")
+        #print(coordinates, "works")
         coordinates_str = f"{coordinates[0]},{coordinates[1]}"
         print(f"Sending coordinates: {coordinates_str}")
         msg = self.protocol.create_msg(coordinates_str.encode())
         self.protocol.current_socket.send(msg)
 
     def send_image(self):
-        im_d = ImageDetails(self.size[0], self.size[1], self.image_chunks)
-        im_d_data = pickle.dumps(im_d)
-
+        #im_d = ImageDetails(self.size[0], self.size[1], self.image_chunks)
+        #im_d_data = pickle.dumps(im_d)
+        im_d_data = pickle.dumps(self.img)
         msg = Protocol(self.s).create_msg(im_d_data)
-        print("msg is -----   ", msg)
+        #print("msg is -----   ", msg)
 
         self.s.send(msg)
-
 
 
 def diller(width: int, n: int) ->list:
