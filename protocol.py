@@ -27,7 +27,7 @@ class Protocol:
             if extra == b"":
                 return False, "Connection Error"
 
-            data =+ extra
+            data += extra
 
         return True, data
 
