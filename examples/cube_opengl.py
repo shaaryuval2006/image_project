@@ -45,6 +45,14 @@ def set_cube_position_left():
 def set_cube_position_right():
     glTranslatef(-2.0, 0.0, -5)
 
+def move_cube_up(speed):
+    glTranslatef(0.0, speed, 0.0)
+
+
+def move_cube_in(speed):
+    glTranslatef(0.0, 0.0, speed)
+
+
 def main():
     pygame.init()
     display = (800, 600)
