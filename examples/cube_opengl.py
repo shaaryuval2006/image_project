@@ -39,7 +39,10 @@ def Cube(delta):
 def move_cube_right(speed):
     glTranslatef(speed, 0.0, 0.0)
 
-def set_cube_position_left():
+def set_cube_position_top_left():
+    glTranslatef(-4.0, 3.0, -5)
+
+def set_cube_position_bottom_left():
     glTranslatef(-8.0, 0.0, -5)
 
 def set_cube_position_right():
@@ -61,7 +64,7 @@ def main():
     gluPerspective(120, (display[0] / display[1]), 0.1, 50.0)
     gluLookAt(0, 0, 0, 0, 0, -5, 0, 1, 0)
 
-    set_cube_position_right()
+    set_cube_position_top_left()
 
     scale_factor = 0.5
 
