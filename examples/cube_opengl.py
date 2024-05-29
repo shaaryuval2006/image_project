@@ -3,6 +3,7 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import time
+import threading
 
 def Cube(delta):
     vertices = (
@@ -51,12 +52,10 @@ def set_cube_position_right():
 def move_cube_up(speed):
     glTranslatef(0.0, speed, 0.0)
 
-
 def move_cube_in(speed):
     glTranslatef(0.0, 0.0, speed)
 
-
-def main():
+def client_thread(position_function):
     pygame.init()
     display = (800, 600)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
@@ -64,23 +63,21 @@ def main():
     gluPerspective(120, (display[0] / display[1]), 0.1, 50.0)
     gluLookAt(0, 0, 0, 0, 0, -5, 0, 1, 0)
 
-    set_cube_position_top_left()
+    position_function()
 
     scale_factor = 0.5
-
     last_time = time.time()
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                quit()
+                return
 
         current_time = time.time()
         if current_time - last_time >= 0.1:
             move_cube_right(0.1)
             last_time = current_time
-
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glPushMatrix()  # Save the current matrix
@@ -90,5 +87,17 @@ def main():
 
         pygame.display.flip()
         pygame.time.wait(10)
+
+def main():
+    threads = []
+    positions = [set_cube_position_top_left, set_cube_position_bottom_left, set_cube_position_right]
+
+    for position in positions:
+        thread = threading.Thread(target=client_thread, args=(position,))
+        thread.start()
+        threads.append(thread)
+
+    for thread in threads:
+        thread.join()
 
 main()

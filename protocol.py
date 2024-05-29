@@ -4,6 +4,7 @@ import socket
 # <length><data>
 class Protocol:
     MESSAGE_LENGTH = 10
+    DELIMITER = " "
     def __init__(self, c_s):
         self.current_socket = c_s
 
