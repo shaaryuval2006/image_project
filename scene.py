@@ -1,8 +1,10 @@
+# scene.py
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
+
 class Cube:
     def __init__(self, delta):
-
         self.vertices = (
             (1 + delta, -1 + delta, -1 + delta + 5),
             (1 + delta, 1 + delta, -1 + delta + 5),
@@ -29,7 +31,7 @@ class Cube:
             (5, 7)
         )
 
-    def drawer(self):
+    def draw(self):
         glBegin(GL_LINES)
         for edge in self.edges:
             for vertex in edge:
@@ -38,6 +40,9 @@ class Cube:
 
 
 class Scene:
-    def __init__(self):
-        self.scene_objs = [Cube(1), Cube(-1)]
+    def __init__(self, positions):
+        self.cubes = [Cube(delta) for delta in positions]
 
+    def draw(self):
+        for cube in self.cubes:
+            cube.draw()

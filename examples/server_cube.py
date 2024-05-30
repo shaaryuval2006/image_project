@@ -1,31 +1,28 @@
+# server_cube.py
+
 import socket
 import threading
-import time
 import pickle
-import scene
-import protocol
-# Cube positions for each client
+import time
+from scene import Scene
+
 cube_positions = [
-    (-4.0, 3.0, -5.0),
-    (-8.0, 0.0, -5.0),
-    (-2.0, 0.0, -5.0)
+    1, -1, 5
 ]
 
 clients = []
 
 def handle_client(client_socket, address):
     print(f"Accepted connection from {address}")
-    position = cube_positions.pop(0)  # Assign a position to the client
-    proto = protocol.Protocol(client_socket)
+    positions = [cube_positions.pop(0)]  # Assign positions to the client
+    scene = Scene(positions)
 
     while True:
-
         try:
-            scene_obj = scene.Scene()
-            # Send cube position to the client
-            data = pickle.dumps(scene_obj)
-            msg = proto.create_msg("SCENE".encode() + protocol.Protocol.DELIMITER.encode() + data)
-            client_socket.sendall(msg)
+            # Send scene to the client
+            data = pickle.dumps(scene)
+            message = str(len(data)).zfill(10).encode() + data
+            client_socket.sendall(message)
             time.sleep(0.1)
         except (ConnectionResetError, BrokenPipeError):
             print(f"Connection lost with {address}")
@@ -39,7 +36,6 @@ def main():
     server.listen(5)
     print("Server listening on port 9999")
 
-    #scene_thread = threading.Thread(target=handle_scene)
     while True:
         client_socket, addr = server.accept()
         clients.append(client_socket)

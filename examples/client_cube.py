@@ -1,3 +1,5 @@
+# client_cube.py
+
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *
@@ -5,58 +7,8 @@ from OpenGL.GLU import *
 import socket
 import pickle
 import threading
-import time
 import protocol
-import scene
-
-
-
-def receive_cube_position(client_socket):
-    while True:
-        try:
-            data = client_socket.recv(4096)
-            position = pickle.loads(data)
-            return position
-        except (ConnectionResetError, EOFError, pickle.UnpicklingError):
-            break
-
-def client_thread():
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect(("127.0.0.1", 9999))
-
-
-
-    pygame.init()
-    display = (800, 600)
-    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-
-    gluPerspective(120, (display[0] / display[1]), 0.1, 50.0)
-    gluLookAt(0, 0, 0, 0, 0, -5, 0, 1, 0)
-
-    scale_factor = 0.5
-    position = receive_cube_position(client_socket)
-    last_time = time.time()
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                return
-
-        current_time = time.time()
-        if current_time - last_time >= 0.1:
-            glTranslatef(0.1, 0.0, 0.0)
-            last_time = current_time
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glPushMatrix()  # Save the current matrix
-        glTranslatef(*position)
-        glScalef(scale_factor, scale_factor, scale_factor)  # Scale the cube
-        Cube(0)  # Draw the scaled cube
-        glPopMatrix()  # Restore the previous matrix
-
-        pygame.display.flip()
-        pygame.time.wait(10)
+from scene import Scene
 
 class NetworkHandler:
     def __init__(self):
@@ -70,78 +22,74 @@ class NetworkHandler:
         while True:
             res, data = self.proto.get_msg()
             if res:
-                # parse data message ... result with cmd, params
-                params = []
-                cmd = "SCENE"
-                if cmd == "SCENE":
-                    self.scene = pickle.loads(params[0])
-                    self.update = True
-                pass # do something with data received
-                # scale_factor = 0.5
-                # position = receive_cube_position(client_socket)
-                # last_time = time.time()
+                #print("Received scene data")
+                self.scene = pickle.loads(data)
+                self.update = True
+
+# client_cube.py
 
 class ClientViewer:
     EXIT = 0
+
     def __init__(self):
-        #network part
+        # Network part
         self.network = NetworkHandler()
 
-        # graphic part
+        # Graphic part
         pygame.init()
         self.display = (800, 600)
         pygame.display.set_mode(self.display, DOUBLEBUF | OPENGL)
-
-        # ORIENTATION:
-        self.position =
+        self.scale_factor = 0.5
 
     def init_graphic(self):
-        gluPerspective(120, (self.display[0] / self.display[1]), 0.1, 50.0)
-        gluLookAt(0, 0, 0, 0, 0, -5, 0, 1, 0)
+        glMatrixMode(GL_PROJECTION)
+        gluPerspective(45, (self.display[0] / self.display[1]), 0.1, 50.0)
+        glMatrixMode(GL_MODELVIEW)
+        gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0)
 
-    def handle_pygame_events(self) -> (bool, int):
+    def handle_pygame_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return True, ClientViewer.EXIT
-                #exit program
-
-
+        return False, None
 
     def iteration(self):
-        # check for pygame events
+        # Check for pygame events
         res, cmd = self.handle_pygame_events()
-        # get scene update
-            # check if there was a scene update... check data
-            # if so update data
+        if res:
+            return cmd
 
-        # draw scene update
-        pass
+        # Check for scene update
+        if self.network.update:
+            self.network.update = False
+
+        # Draw scene
+        self.draw_scene()
 
     def draw_scene(self):
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glPushMatrix()  # Save the current matrix
-        glTranslatef(*position)
-        glScalef(scale_factor, scale_factor, scale_factor)  # Scale the cube
-        Cube(0)  # Draw the scaled cube
-        glPopMatrix()  # Restore the previous matrix
-
+        glLoadIdentity()
+        if self.network.scene:
+            self.network.scene.draw()
         pygame.display.flip()
 
     def handle(self):
-        # network thread startup
+        # Network thread startup
         thread = threading.Thread(target=self.network.handle)
+        thread.start()
         self.init_graphic()
-        while True:
-            #....
-            self.iteration()
-            pygame.time.wait(10)
 
+        while True:
+            cmd = self.iteration()
+            if cmd == ClientViewer.EXIT:
+                break
+            pygame.time.wait(10)
 
 def main():
     cview = ClientViewer()
-    ClientViewer.handle()
+    cview.handle()
 
 if __name__ == "__main__":
     main()
+
