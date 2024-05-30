@@ -22,11 +22,8 @@ class NetworkHandler:
         while True:
             res, data = self.proto.get_msg()
             if res:
-                #print("Received scene data")
                 self.scene = pickle.loads(data)
                 self.update = True
-
-# client_cube.py
 
 class ClientViewer:
     EXIT = 0
@@ -70,8 +67,14 @@ class ClientViewer:
     def draw_scene(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
+        gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0)
+
+        print("start scene")
         if self.network.scene:
             self.network.scene.draw()
+        print("end_scene ...\n")
+
+
         pygame.display.flip()
 
     def handle(self):
@@ -92,4 +95,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

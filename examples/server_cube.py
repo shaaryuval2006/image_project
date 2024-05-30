@@ -7,15 +7,16 @@ import time
 from scene import Scene
 
 cube_positions = [
-    1, -1, 5
+    -2, 2
+
 ]
 
 clients = []
 
 def handle_client(client_socket, address):
     print(f"Accepted connection from {address}")
-    positions = [cube_positions.pop(0)]  # Assign positions to the client
-    scene = Scene(positions)
+    #positions = [cube_positions.pop(0)]  # Assign positions to the client
+    scene = Scene(cube_positions)
 
     while True:
         try:
