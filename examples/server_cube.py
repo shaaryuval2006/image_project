@@ -6,7 +6,7 @@ from scene import Scene
 
 clients = []
 texture_parts = [0.0, 1 / 3, 2 / 3, 1.0]
-border_threshold = 8.0  # Adjust this threshold as needed
+border_threshold = 35.0  # Adjust this threshold as needed
 
 def handle_client(client_socket, address, part):
     print(f"Accepted connection from {address}")
@@ -16,7 +16,7 @@ def handle_client(client_socket, address, part):
 
     scene = Scene(texture_coords)
     x_offset = 0.0
-    x_increment = 0.1  # Adjust the increment value as needed
+    x_increment = 0.4  # Adjust the increment value as needed
 
     while True:
         try:

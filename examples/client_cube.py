@@ -62,6 +62,7 @@ class ClientViewer:
     def __init__(self):
         # Network part
         self.network = NetworkHandler()
+        self.rotation_axis = np.array([0, 0, 1])
 
         # Graphic part
         pygame.init()
@@ -76,6 +77,12 @@ class ClientViewer:
         # Rotation parameters
         self.angle_degrees = 120
         self.rotation_axis = np.array([0, 1, 0])  # Rotate around the Y-axis
+
+    def rotate_image(self, angle_degrees):
+        self.network.scene.screen.base_vertices = [
+            rotate_vector(vertex, angle_degrees, [0, 0, 1])
+            for vertex in self.network.scene.screen.base_vertices
+        ]
 
     def init_graphic(self):
         glMatrixMode(GL_PROJECTION)

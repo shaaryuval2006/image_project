@@ -8,10 +8,10 @@ class Screen:
         self.width_scale = width_scale
         self.height_scale = height_scale
         self.base_vertices = (
-            (self.width_scale / 2 + self.delta, -self.height_scale / 2 + self.delta, -1 + self.delta),
-            (self.width_scale / 2 + self.delta, self.height_scale / 2 + self.delta, -1 + self.delta),
-            (-self.width_scale / 2 + self.delta, self.height_scale / 2 + self.delta, -1 + self.delta),
-            (-self.width_scale / 2 + self.delta, -self.height_scale / 2 + self.delta, -1 + self.delta)
+            (self.width_scale / 2 + self.delta-25, -self.height_scale / 2 + self.delta, -1 + self.delta),
+            (self.width_scale / 2 + self.delta-25, self.height_scale / 2 + self.delta, -1 + self.delta),
+            (-self.width_scale / 2 + self.delta-25, self.height_scale / 2 + self.delta, -1 + self.delta),
+            (-self.width_scale / 2 + self.delta-25, -self.height_scale / 2 + self.delta, -1 + self.delta)
         )
         self.vertices = self.base_vertices
         self.texture_name = r'..\stitched_image_without_pillow2.png'
