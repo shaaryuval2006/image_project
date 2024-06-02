@@ -2,7 +2,7 @@ from PIL import Image
 import socket
 import threading
 import time
-from protocol import Protocol, ImageDetails
+from protocol import Protocol
 from numpy import asarray
 import pickle
 

@@ -1,24 +1,25 @@
-# scene.py
-
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from PIL import Image
 
 class Screen:
-    def __init__(self, delta):
-        self.vertices = (
-            (1 + delta, -0.75 + delta, -1 + delta),
-            (1 + delta, 0.75 + delta, -1 + delta),
-            (-1 + delta, 0.75 + delta, -1 + delta),
-            (-1 + delta, -0.75 + delta, -1 + delta)
+    def __init__(self, delta, texture_coords, width_scale=4.5, height_scale=4.5):
+        self.delta = delta
+        self.width_scale = width_scale
+        self.height_scale = height_scale
+        self.base_vertices = (
+            (self.width_scale + self.delta, -0.75 * self.height_scale + self.delta, -1 + self.delta),
+            (self.width_scale + self.delta, 0.75 * self.height_scale + self.delta, -1 + self.delta),
+            (-self.width_scale + self.delta, 0.75 * self.height_scale + self.delta, -1 + self.delta),
+            (-self.width_scale + self.delta, -0.75 * self.height_scale + self.delta, -1 + self.delta)
         )
-
+        self.vertices = self.base_vertices
         self.texture_name = r'..\stitched_image_without_pillow2.png'
         self.texture = Image.open(self.texture_name)
         if self.texture.mode != 'RGBA':
             self.texture = self.texture.convert('RGBA')
         self.texture_data = self.texture.tobytes()
-        self.texture_cords = ((0, 0), (0, 1), (1, 1), (1, 0))
+        self.texture_coords = texture_coords
 
     def draw(self):
         texture = glGenTextures(1)
@@ -33,18 +34,16 @@ class Screen:
         glGenerateMipmap(GL_TEXTURE_2D)
 
         glEnable(GL_TEXTURE_2D)
-        print("Drawing screen")
+        #print("Drawing screen")
         glBegin(GL_QUADS)
         glNormal3d(0, 0, 1)
 
         for i in range(4):
-            glTexCoord2f(self.texture_cords[i][0], self.texture_cords[i][1])
+            glTexCoord2f(self.texture_coords[i][0], self.texture_coords[i][1])
             glVertex3fv(self.vertices[i])
 
         glEnd()
         glDisable(GL_TEXTURE_2D)
-
-
 
 class Cube:
     def __init__(self, delta):
@@ -75,21 +74,17 @@ class Cube:
         )
 
     def draw(self):
-        print("Drawing cube")  # Add this line
+        #print("Drawing cube")
         glBegin(GL_LINES)
         for edge in self.edges:
             for vertex in edge:
                 glVertex3fv(self.vertices[vertex])
         glEnd()
 
-
 class Scene:
-    def __init__(self, delta_list):
-        #self.objs = [Cube(delta) for delta in delta_list]
+    def __init__(self, texture_coords):
         self.objs = []
-        for delta in delta_list:
-            self.objs.append(Cube(delta))
-        self.objs.append(Screen(1))
+        self.objs.append(Screen(1, texture_coords))
 
     def draw(self):
         for obj in self.objs:

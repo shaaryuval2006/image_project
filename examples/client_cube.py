@@ -69,10 +69,10 @@ class ClientViewer:
         glLoadIdentity()
         gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0)
 
-        print("start scene")
+        #print("start scene")
         if self.network.scene:
             self.network.scene.draw()
-        print("end_scene ...\n")
+        #print("end_scene ...\n")
 
 
         pygame.display.flip()
