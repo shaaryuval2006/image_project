@@ -6,19 +6,31 @@ from scene import Scene
 
 clients = []
 texture_parts = [0.0, 1 / 3, 2 / 3, 1.0]
-
+border_threshold = 8.0  # Adjust this threshold as needed
 
 def handle_client(client_socket, address, part):
     print(f"Accepted connection from {address}")
-    # Calculate the texture coordinates based on the part
     start = texture_parts[part]
     end = texture_parts[part + 1]
     texture_coords = [(start, 1), (start, 0), (end, 0), (end, 1)]
 
     scene = Scene(texture_coords)
+    x_offset = 0.0
+    x_increment = 0.1  # Adjust the increment value as needed
 
     while True:
         try:
+            # Update x_offset
+            scene.update_x_offset(x_offset)
+            x_offset += x_increment
+            if x_offset > border_threshold:
+                x_offset = 0.0
+                part = (part + 1) % 3
+                start = texture_parts[part]
+                end = texture_parts[part + 1]
+                texture_coords = [(start, 1), (start, 0), (end, 0), (end, 1)]
+                scene = Scene(texture_coords)  # Create a new scene for the next client
+
             # Send scene to the client
             data = pickle.dumps(scene)
             message = str(len(data)).zfill(10).encode() + data
@@ -29,7 +41,6 @@ def handle_client(client_socket, address, part):
             break
 
     client_socket.close()
-
 
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -44,7 +55,6 @@ def main():
         client_thread = threading.Thread(target=handle_client, args=(client_socket, addr, part))
         client_thread.start()
         part = (part + 1) % 3  # Cycle through parts 0, 1, 2
-
 
 if __name__ == "__main__":
     main()

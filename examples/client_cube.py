@@ -9,6 +9,36 @@ import pickle
 import threading
 import protocol
 from scene import Scene
+import numpy as np
+
+
+def rotate_vector(vector, angle_degrees, axis):
+    angle_radians = np.radians(angle_degrees)
+    cos_theta = np.cos(angle_radians)
+    sin_theta = np.sin(angle_radians)
+    u = np.array(axis)
+    u = u / np.linalg.norm(u)
+
+    rotation_matrix = np.array([
+        [
+            cos_theta + u[0] * u[0] * (1 - cos_theta),
+            u[0] * u[1] * (1 - cos_theta) - u[2] * sin_theta,
+            u[0] * u[2] * (1 - cos_theta) + u[1] * sin_theta
+        ],
+        [
+            u[1] * u[0] * (1 - cos_theta) + u[2] * sin_theta,
+            cos_theta + u[1] * u[1] * (1 - cos_theta),
+            u[1] * u[2] * (1 - cos_theta) - u[0] * sin_theta
+        ],
+        [
+            u[2] * u[0] * (1 - cos_theta) - u[1] * sin_theta,
+            u[2] * u[1] * (1 - cos_theta) + u[0] * sin_theta,
+            cos_theta + u[2] * u[2] * (1 - cos_theta)
+        ]
+    ])
+
+    return np.dot(rotation_matrix, vector)
+
 
 class NetworkHandler:
     def __init__(self):
@@ -25,6 +55,7 @@ class NetworkHandler:
                 self.scene = pickle.loads(data)
                 self.update = True
 
+
 class ClientViewer:
     EXIT = 0
 
@@ -38,11 +69,21 @@ class ClientViewer:
         pygame.display.set_mode(self.display, DOUBLEBUF | OPENGL)
         self.scale_factor = 0.5
 
+        self.eye = np.array([0, 0, 10])
+        self.center = np.array([0, 0, 0])
+        self.up = np.array([0, 1, 0])
+
+        # Rotation parameters
+        self.angle_degrees = 120
+        self.rotation_axis = np.array([0, 1, 0])  # Rotate around the Y-axis
+
     def init_graphic(self):
         glMatrixMode(GL_PROJECTION)
         gluPerspective(45, (self.display[0] / self.display[1]), 0.1, 50.0)
         glMatrixMode(GL_MODELVIEW)
-        gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0)
+        rotated_eye = rotate_vector(self.eye, self.angle_degrees, self.rotation_axis)
+        gluLookAt(rotated_eye[0], rotated_eye[1], rotated_eye[2], self.center[0], self.center[1], self.center[2],
+                  self.up[0], self.up[1], self.up[2])
 
     def handle_pygame_events(self):
         for event in pygame.event.get():
@@ -67,13 +108,12 @@ class ClientViewer:
     def draw_scene(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
-        gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0)
+        rotated_eye = rotate_vector(self.eye, self.angle_degrees, self.rotation_axis)
+        gluLookAt(rotated_eye[0], rotated_eye[1], rotated_eye[2], self.center[0], self.center[1], self.center[2],
+                  self.up[0], self.up[1], self.up[2])
 
-        #print("start scene")
         if self.network.scene:
             self.network.scene.draw()
-        #print("end_scene ...\n")
-
 
         pygame.display.flip()
 
@@ -89,9 +129,11 @@ class ClientViewer:
                 break
             pygame.time.wait(10)
 
+
 def main():
     cview = ClientViewer()
     cview.handle()
+
 
 if __name__ == "__main__":
     main()

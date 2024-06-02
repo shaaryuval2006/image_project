@@ -8,10 +8,10 @@ class Screen:
         self.width_scale = width_scale
         self.height_scale = height_scale
         self.base_vertices = (
-            (self.width_scale + self.delta, -0.75 * self.height_scale + self.delta, -1 + self.delta),
-            (self.width_scale + self.delta, 0.75 * self.height_scale + self.delta, -1 + self.delta),
-            (-self.width_scale + self.delta, 0.75 * self.height_scale + self.delta, -1 + self.delta),
-            (-self.width_scale + self.delta, -0.75 * self.height_scale + self.delta, -1 + self.delta)
+            (self.width_scale / 2 + self.delta, -self.height_scale / 2 + self.delta, -1 + self.delta),
+            (self.width_scale / 2 + self.delta, self.height_scale / 2 + self.delta, -1 + self.delta),
+            (-self.width_scale / 2 + self.delta, self.height_scale / 2 + self.delta, -1 + self.delta),
+            (-self.width_scale / 2 + self.delta, -self.height_scale / 2 + self.delta, -1 + self.delta)
         )
         self.vertices = self.base_vertices
         self.texture_name = r'..\stitched_image_without_pillow2.png'
@@ -20,6 +20,7 @@ class Screen:
             self.texture = self.texture.convert('RGBA')
         self.texture_data = self.texture.tobytes()
         self.texture_coords = texture_coords
+        self.x_offset = 0.1  # Add an offset for the x-axis
 
     def draw(self):
         texture = glGenTextures(1)
@@ -34,16 +35,19 @@ class Screen:
         glGenerateMipmap(GL_TEXTURE_2D)
 
         glEnable(GL_TEXTURE_2D)
-        #print("Drawing screen")
         glBegin(GL_QUADS)
         glNormal3d(0, 0, 1)
 
+        # Updated section: incorporating x_offset
         for i in range(4):
+            x, y, z = self.base_vertices[i]
             glTexCoord2f(self.texture_coords[i][0], self.texture_coords[i][1])
-            glVertex3fv(self.vertices[i])
+            glVertex3f(x + self.x_offset, y, z)
 
         glEnd()
         glDisable(GL_TEXTURE_2D)
+
+
 
 class Cube:
     def __init__(self, delta):
@@ -84,8 +88,12 @@ class Cube:
 class Scene:
     def __init__(self, texture_coords):
         self.objs = []
-        self.objs.append(Screen(1, texture_coords))
+        self.screen = Screen(1, texture_coords)
+        self.objs.append(self.screen)
 
     def draw(self):
         for obj in self.objs:
             obj.draw()
+
+    def update_x_offset(self, offset):
+        self.screen.x_offset = offset
