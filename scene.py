@@ -91,14 +91,14 @@ class Cube:
 class Scene:
     def __init__(self, texture_coords, line_of_sight_angle, fov):
         self.objs = []
-        self.screen = Screen(1, texture_coords)
+        self.screen = Screen(0, texture_coords)
         # Position the first cube on the left
-        self.cube1 = Cube(1, translation=(5, 0, 0))
+        self.cube1 = Cube(0, translation=(5, 0, 0))
         # Position the second cube on the right
-        self.cube2 = Cube(1, translation=(-5, 0, 0))
-        self.cube3 = Cube(1, translation=(0, 0, -5))
+        self.cube2 = Cube(0, translation=(-5, 0, 0))
+        self.cube3 = Cube(0, translation=(0, 0, -5))
         # Position the second cube on the right
-        self.cube4 = Cube(1, translation=(0, 0, 5))
+        self.cube4 = Cube(0, translation=(0, 0, 5))
 
         self.objs.append(self.screen)
         self.objs.append(self.cube1)
