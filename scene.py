@@ -89,20 +89,31 @@ class Cube:
 
 
 class Scene:
-    def __init__(self, texture_coords):
+    def __init__(self, texture_coords, line_of_sight_angle, fov):
         self.objs = []
         self.screen = Screen(1, texture_coords)
         # Position the first cube on the left
-        self.cube1 = Cube(1, translation=(-5, 2, -4))
+        self.cube1 = Cube(1, translation=(5, 0, 0))
         # Position the second cube on the right
-        self.cube2 = Cube(1, translation=(-2, -4, 4))
+        self.cube2 = Cube(1, translation=(-5, 0, 0))
+        self.cube3 = Cube(1, translation=(0, 0, -5))
+        # Position the second cube on the right
+        self.cube4 = Cube(1, translation=(0, 0, 5))
+
         self.objs.append(self.screen)
         self.objs.append(self.cube1)
         self.objs.append(self.cube2)
+        self.objs.append(self.cube3)
+        self.objs.append(self.cube4)
+        self.line_of_sight_angle = line_of_sight_angle
+        self.fov = fov
 
     def draw(self):
+        glPushMatrix()
+        #glRotatef(self.rotation_angle, 0, 1, 0)  # Rotate around the Y-axis
         for obj in self.objs:
             obj.draw()
+        glPopMatrix()
 
     def update_x_offset(self, offset):
         self.screen.x_offset = offset
