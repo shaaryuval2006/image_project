@@ -136,11 +136,9 @@ class ClientViewer:
                 break
             pygame.time.wait(10)
 
-
 def main():
     cview = ClientViewer()
     cview.handle()
-
 
 if __name__ == "__main__":
     main()

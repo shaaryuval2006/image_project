@@ -50,7 +50,8 @@ class Screen:
 
 
 class Cube:
-    def __init__(self, delta):
+    def __init__(self, delta, translation=(0, 0, 0)):
+        self.translation = translation
         self.vertices = (
             (1 + delta, -1 + delta, -1 + delta),
             (1 + delta, 1 + delta, -1 + delta),
@@ -78,18 +79,26 @@ class Cube:
         )
 
     def draw(self):
-        #print("Drawing cube")
         glBegin(GL_LINES)
         for edge in self.edges:
             for vertex in edge:
-                glVertex3fv(self.vertices[vertex])
+                glVertex3f(self.vertices[vertex][0] + self.translation[0],
+                           self.vertices[vertex][1] + self.translation[1],
+                           self.vertices[vertex][2] + self.translation[2])
         glEnd()
+
 
 class Scene:
     def __init__(self, texture_coords):
         self.objs = []
         self.screen = Screen(1, texture_coords)
+        # Position the first cube on the left
+        self.cube1 = Cube(1, translation=(-5, 2, -4))
+        # Position the second cube on the right
+        self.cube2 = Cube(1, translation=(-2, -4, 4))
         self.objs.append(self.screen)
+        self.objs.append(self.cube1)
+        self.objs.append(self.cube2)
 
     def draw(self):
         for obj in self.objs:
