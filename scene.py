@@ -2,6 +2,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from PIL import Image
 
+
 class Screen:
     def __init__(self, delta, texture_coords, width_scale=4.5, height_scale=4.5):
         self.delta = delta
