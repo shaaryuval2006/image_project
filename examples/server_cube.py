@@ -34,7 +34,7 @@ class Database:
 
     def get_password(self, username):
         cursor = self.conn.cursor()
-        cursor.execute(username,)
+        cursor.execute("SELECT password FROM users WHERE username=?", ((username),))
         result = cursor.fetchone()
         if result:
             return result[0]
@@ -76,15 +76,12 @@ class ClientHandler(threading.Thread):
                 if data:
                     username, password = pickle.loads(data)
                     db = Database()
-                    # Check if username already exists
                     existing_password = db.get_password(username)
                     if existing_password is None:
-                        # Username doesn't exist, add new user
                         db.add_user(username, password)
                         print(f"Added new user: {username}")
                         response_msg = "User added successfully"
                     else:
-                        # Username already exists, return error message
                         print(f"Username '{username}' already exists")
                         response_msg = "Error: Username already exists"
                     db.close()
@@ -130,3 +127,15 @@ if __name__ == "__main__":
     server = Server()
     server.start()
 
+
+'''"C:\Program Files\Python311\python.exe" C:\cyber\pyptojects\image_project8\examples\server_cube.py 
+Server listening on port 9999
+Accepted connection from ('127.0.0.1', 50365)
+Exception in thread Thread-1:
+Traceback (most recent call last):
+  File "C:\Program Files\Python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "C:\cyber\pyptojects\image_project8\examples\server_cube.py", line 77, in run
+    username, password = pickle.loads(data)
+    ^^^^^^^^^^^^^^^^^^
+ValueError: too many values to unpack (expected 2)'''
