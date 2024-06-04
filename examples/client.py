@@ -4,6 +4,7 @@ import pickle
 import socket
 import protocol
 
+
 class NetworkHandler:
     def __init__(self):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,28 +26,38 @@ class NetworkHandler:
             else:
                 return data
 
-def register():
-    username = simpledialog.askstring("Register", "Enter your username:")
-    password = simpledialog.askstring("Register", "Enter your password:", show='*')
-    if username and password:
-        network_handler.send_credentials(username, password, "1")
-        response = network_handler.get_response()
-        messagebox.showinfo("Response", response)
 
-def sign_in():
-    username = simpledialog.askstring("Sign In", "Enter your username:")
-    password = simpledialog.askstring("Sign In", "Enter your password:", show='*')
-    if username and password:
-        network_handler.send_credentials(username, password, "2")
-        response = network_handler.get_response()
-        messagebox.showinfo("Response", response)
+class GUI_Window:
+    def __init__(self, master):
+        self.master = master
+        self.network_handler = NetworkHandler()
+        self.master.geometry('600x400')
 
-base = tk.Tk()
-base.geometry('600x400')
-button1 = tk.Button(base, text="Register", command=register, height=3, width=10, bg='lightblue')
-button1.place(relx=0.3, rely=0.3)
-button2 = tk.Button(base, text="Sign-in", command=sign_in, height=3, width=10, bg='lightgreen')
-button2.place(relx=0.6, rely=0.3)
+        self.button1 = tk.Button(self.master, text="Register", command=self.register, height=3, width=10,
+                                 bg='lightblue')
+        self.button1.place(relx=0.3, rely=0.3)
 
-network_handler = NetworkHandler()
-base.mainloop()
+        self.button2 = tk.Button(self.master, text="Sign-in", command=self.sign_in, height=3, width=10, bg='lightgreen')
+        self.button2.place(relx=0.6, rely=0.3)
+
+    def register(self):
+        username = simpledialog.askstring("Register", "Enter your username:")
+        password = simpledialog.askstring("Register", "Enter your password:", show='*')
+        if username and password:
+            self.network_handler.send_credentials(username, password, "1")
+            response = self.network_handler.get_response()
+            messagebox.showinfo("Response", response)
+
+    def sign_in(self):
+        username = simpledialog.askstring("Sign In", "Enter your username:")
+        password = simpledialog.askstring("Sign In", "Enter your password:", show='*')
+        if username and password:
+            self.network_handler.send_credentials(username, password, "2")
+            response = self.network_handler.get_response()
+            messagebox.showinfo("Response", response)
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = GUI_Window(root)
+    root.mainloop()
