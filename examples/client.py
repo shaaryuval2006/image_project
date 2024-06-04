@@ -9,7 +9,9 @@ class NetworkHandler:
         self.proto = protocol.Protocol(self.client_socket)
 
     def send_credentials(self, username, password):
-        data = pickle.dumps((username, password))
+        obj = (username, password)
+        data = pickle.dumps(obj)
+        dtest = pickle.loads(data)
         message = str(len(data)).zfill(10).encode() + data
         self.client_socket.sendall(message)
 

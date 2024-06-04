@@ -4,6 +4,7 @@ import pickle
 import time
 from scene import Scene
 import sqlite3
+import protocol
 
 
 class Database:
@@ -48,6 +49,7 @@ class ClientHandler(threading.Thread):
         self.x_offset = 0.0
         self.x_increment = 0.4
         self.setup_scene()
+        self.protocol = protocol.Protocol(self.client_socket)
 
     def setup_scene(self):
         start = self.texture_parts[self.part]
@@ -60,7 +62,7 @@ class ClientHandler(threading.Thread):
         print(f"Accepted connection from {self.address}")
         while True:
             try:
-                data = self.client_socket.recv(1024)
+                res, data = self.protocol.get_msg()
                 if data:
                     username, password = pickle.loads(data)
                     db = Database()
