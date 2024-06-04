@@ -15,7 +15,11 @@ class Database:
 
     def create_table(self):
         cursor = self.conn.cursor()
-        pass
+        cursor.execute('''CREATE TABLE IF NOT EXISTS users (
+                          id INTEGER PRIMARY KEY,
+                          username TEXT NOT NULL,
+                          password TEXT NOT NULL)''')
+        self.conn.commit()
 
     def add_user(self, username, password):
         cursor = self.conn.cursor()
