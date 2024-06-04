@@ -26,6 +26,10 @@ class NetworkHandler:
             if res:
                 msg = pickle.loads(data)
                 print(msg)  # Print the received message from the server
+                break
+            else:
+                print(data)
+                break
 
 def main():
     cview = NetworkHandler()

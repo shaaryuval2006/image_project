@@ -94,8 +94,11 @@ class ClientHandler(threading.Thread):
                     else:
                         response_msg = "Error: Invalid choice"
                     db.close()
+                    print(response_msg)
+
                     response_data = pickle.dumps(response_msg)
-                    self.protocol.create_msg(response_data)
+                    data = self.protocol.create_msg(response_data)
+                    self.client_socket.sendall(data)
             except (ConnectionResetError, BrokenPipeError):
                 print(f"Connection lost with {self.address}")
                 break
