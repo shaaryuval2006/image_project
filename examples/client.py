@@ -8,7 +8,15 @@ class NetworkHandler:
         self.client_socket.connect(("127.0.0.1", 9999))
         self.proto = protocol.Protocol(self.client_socket)
 
+    def send_credentials(self, username, password):
+        data = pickle.dumps((username, password))
+        message = str(len(data)).zfill(10).encode() + data
+        self.client_socket.sendall(message)
+
     def handle(self):
+        username = input("Enter your username: ")
+        password = input("Enter your password: ")
+        self.send_credentials(username, password)
         while True:
             res, data = self.proto.get_msg()
             if res:

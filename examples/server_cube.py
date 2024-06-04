@@ -18,7 +18,7 @@ class Database:
 
     def add_user(self, username, password):
         cursor = self.conn.cursor()
-        cursor.execute(username, password)
+        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         self.conn.commit()
 
     def get_password(self, username):
@@ -60,11 +60,12 @@ class ClientHandler(threading.Thread):
         print(f"Accepted connection from {self.address}")
         while True:
             try:
-                self.update_scene()
-                data = pickle.dumps(self.scene)
-                message = str(len(data)).zfill(10).encode() + data
-                self.client_socket.sendall(message)
-                time.sleep(0.1)
+                data = self.client_socket.recv(1024)
+                if data:
+                    username, password = pickle.loads(data)
+                    db = Database()
+                    db.add_user(username, password)
+                    db.close()
             except (ConnectionResetError, BrokenPipeError):
                 print(f"Connection lost with {self.address}")
                 break
