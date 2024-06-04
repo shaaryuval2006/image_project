@@ -3,6 +3,35 @@ import threading
 import pickle
 import time
 from scene import Scene
+import sqlite3
+
+
+class Database:
+    def __init__(self, db_name="users.db"):
+        self.db_name = db_name
+        self.conn = sqlite3.connect(db_name)
+        self.create_table()
+
+    def create_table(self):
+        cursor = self.conn.cursor()
+        pass
+
+    def add_user(self, username, password):
+        cursor = self.conn.cursor()
+        cursor.execute(username, password)
+        self.conn.commit()
+
+    def get_password(self, username):
+        cursor = self.conn.cursor()
+        cursor.execute(username,)
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        else:
+            return None
+
+    def close(self):
+        self.conn.close()
 
 
 class ClientHandler(threading.Thread):
