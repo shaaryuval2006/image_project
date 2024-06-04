@@ -70,8 +70,21 @@ class ClientHandler(threading.Thread):
                 if data:
                     username, password = pickle.loads(data)
                     db = Database()
-                    db.add_user(username, password)
+                    # Check if username already exists
+                    existing_password = db.get_password(username)
+                    if existing_password is None:
+                        # Username doesn't exist, add new user
+                        db.add_user(username, password)
+                        print(f"Added new user: {username}")
+                        response_msg = "User added successfully"
+                    else:
+                        # Username already exists, return error message
+                        print(f"Username '{username}' already exists")
+                        response_msg = "Error: Username already exists"
                     db.close()
+                    # Send response message to the client
+                    response_data = pickle.dumps(response_msg)
+                    self.protocol.send_msg(response_data)
             except (ConnectionResetError, BrokenPipeError):
                 print(f"Connection lost with {self.address}")
                 break
