@@ -26,6 +26,12 @@ class Database:
         cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
         self.conn.commit()
 
+        print("Contents of the users table:")
+        cursor.execute("SELECT * FROM users")
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+
     def get_password(self, username):
         cursor = self.conn.cursor()
         cursor.execute(username,)
@@ -84,7 +90,7 @@ class ClientHandler(threading.Thread):
                     db.close()
                     # Send response message to the client
                     response_data = pickle.dumps(response_msg)
-                    self.protocol.send_msg(response_data)
+                    self.protocol.create_msg(response_data)
             except (ConnectionResetError, BrokenPipeError):
                 print(f"Connection lost with {self.address}")
                 break
@@ -129,16 +135,16 @@ if __name__ == "__main__":
 '''
 "C:\Program Files\Python311\python.exe" C:\cyber\pyptojects\image_project8\examples\server_cube.py 
 Server listening on port 9999
-Accepted connection from ('127.0.0.1', 50230)
+Accepted connection from ('127.0.0.1', 50324)
 Exception in thread Thread-1:
 Traceback (most recent call last):
   File "C:\Program Files\Python311\Lib\threading.py", line 1045, in _bootstrap_inner
     self.run()
-  File "C:\cyber\pyptojects\image_project8\examples\server_cube.py", line 69, in run
-    db.add_user(username, password)
-  File "C:\cyber\pyptojects\image_project8\examples\server_cube.py", line 22, in add_user
-    cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
-sqlite3.OperationalError: no such table: users
+  File "C:\cyber\pyptojects\image_project8\examples\server_cube.py", line 80, in run
+    existing_password = db.get_password(username)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\cyber\pyptojects\image_project8\examples\server_cube.py", line 37, in get_password
+    cursor.execute(username,)
+sqlite3.OperationalError: near "111": syntax error
 
-Process finished with exit code -1
 '''
