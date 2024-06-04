@@ -106,3 +106,22 @@ class Server:
 if __name__ == "__main__":
     server = Server()
     server.start()
+
+
+
+'''
+"C:\Program Files\Python311\python.exe" C:\cyber\pyptojects\image_project8\examples\server_cube.py 
+Server listening on port 9999
+Accepted connection from ('127.0.0.1', 50230)
+Exception in thread Thread-1:
+Traceback (most recent call last):
+  File "C:\Program Files\Python311\Lib\threading.py", line 1045, in _bootstrap_inner
+    self.run()
+  File "C:\cyber\pyptojects\image_project8\examples\server_cube.py", line 69, in run
+    db.add_user(username, password)
+  File "C:\cyber\pyptojects\image_project8\examples\server_cube.py", line 22, in add_user
+    cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+sqlite3.OperationalError: no such table: users
+
+Process finished with exit code -1
+'''
