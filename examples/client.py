@@ -1,3 +1,5 @@
+import tkinter as tk
+from tkinter import simpledialog, messagebox
 import pickle
 import socket
 import protocol
@@ -5,35 +7,46 @@ import protocol
 class NetworkHandler:
     def __init__(self):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect(("127.0.0.1", 9999))
+        self.client_socket.connect(("127.0.0.1", 8888))
         self.proto = protocol.Protocol(self.client_socket)
 
     def send_credentials(self, username, password, choice):
-        obj = (username, password, choice)  # Add choice to the data to send
+        obj = (username, password, choice)
         data = pickle.dumps(obj)
-        message = str(len(data)).zfill(10).encode() + data
+        message = self.proto.create_msg(data)
         self.client_socket.sendall(message)
 
-    def handle(self):
-        print("1. Register")
-        print("2. Sign in")
-        choice = input("Enter your choice: ")
-        username = input("Enter your username: ")
-        password = input("Enter your password: ")
-        self.send_credentials(username, password, choice)
+    def get_response(self):
         while True:
             res, data = self.proto.get_msg()
             if res:
                 msg = pickle.loads(data)
-                print(msg)  # Print the received message from the server
-                break
+                return msg
             else:
-                print(data)
-                break
+                return data
 
-def main():
-    cview = NetworkHandler()
-    cview.handle()
+def register():
+    username = simpledialog.askstring("Register", "Enter your username:")
+    password = simpledialog.askstring("Register", "Enter your password:", show='*')
+    if username and password:
+        network_handler.send_credentials(username, password, "1")
+        response = network_handler.get_response()
+        messagebox.showinfo("Response", response)
 
-if __name__ == "__main__":
-    main()
+def sign_in():
+    username = simpledialog.askstring("Sign In", "Enter your username:")
+    password = simpledialog.askstring("Sign In", "Enter your password:", show='*')
+    if username and password:
+        network_handler.send_credentials(username, password, "2")
+        response = network_handler.get_response()
+        messagebox.showinfo("Response", response)
+
+base = tk.Tk()
+base.geometry('600x400')
+button1 = tk.Button(base, text="Register", command=register, height=3, width=10, bg='lightblue')
+button1.place(relx=0.3, rely=0.3)
+button2 = tk.Button(base, text="Sign-in", command=sign_in, height=3, width=10, bg='lightgreen')
+button2.place(relx=0.6, rely=0.3)
+
+network_handler = NetworkHandler()
+base.mainloop()

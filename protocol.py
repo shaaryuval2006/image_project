@@ -1,5 +1,3 @@
-# protocol.py
-
 class Protocol:
     MESSAGE_LENGTH = 10
 
