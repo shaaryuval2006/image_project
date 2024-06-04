@@ -74,18 +74,26 @@ class ClientHandler(threading.Thread):
             try:
                 res, data = self.protocol.get_msg()
                 if data:
-                    username, password = pickle.loads(data)
+                    username, password, choice = pickle.loads(data)  # Unpack all values
                     db = Database()
-                    existing_password = db.get_password(username)
-                    if existing_password is None:
-                        db.add_user(username, password)
-                        print(f"Added new user: {username}")
-                        response_msg = "User added successfully"
+                    if choice == "1":  # Register
+                        existing_password = db.get_password(username)
+                        if existing_password is None:
+                            db.add_user(username, password)
+                            print(f"Added new user: {username}")
+                            response_msg = "User added successfully"
+                        else:
+                            print(f"Username '{username}' already exists")
+                            response_msg = "Error: Username already exists"
+                    elif choice == "2":  # Sign in
+                        stored_password = db.get_password(username)
+                        if stored_password == password:
+                            response_msg = "Success: Logged in"
+                        else:
+                            response_msg = "Error: Incorrect password"
                     else:
-                        print(f"Username '{username}' already exists")
-                        response_msg = "Error: Username already exists"
+                        response_msg = "Error: Invalid choice"
                     db.close()
-                    # Send response message to the client
                     response_data = pickle.dumps(response_msg)
                     self.protocol.create_msg(response_data)
             except (ConnectionResetError, BrokenPipeError):
