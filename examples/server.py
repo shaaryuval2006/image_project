@@ -61,8 +61,6 @@ class ClientHandler(threading.Thread):
                         stored_password = db.get_password(username)
                         if stored_password == password:
                             response_msg = "Success: Logged in"
-                            self.signed_in_clients.append(self.client_socket)
-
                         else:
                             response_msg = "Error: Incorrect password"
                     else:
@@ -72,6 +70,15 @@ class ClientHandler(threading.Thread):
                     response_data = pickle.dumps(response_msg)
                     data = self.protocol.create_msg(response_data)
                     self.client_socket.sendall(data)
+
+                    if choice == "sign_in" and response_msg == "Success: Logged in":
+                        res, data = self.protocol.get_msg()
+                        if data:
+                            num_screens = pickle.loads(data)
+                            print(f"User {username} has {num_screens} screens")
+                            self.signed_in_clients.append((self.client_socket, num_screens))
+                            print(self.signed_in_clients)
+
             except (ConnectionResetError, BrokenPipeError):
                 print(f"Connection lost with {self.address}")
                 break

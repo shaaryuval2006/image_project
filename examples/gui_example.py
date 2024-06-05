@@ -5,7 +5,6 @@ import tkinter as tk
 def register():
     pass
 
-
 def sign_in():
     pass
 
