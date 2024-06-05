@@ -44,7 +44,7 @@ class GUI_Window:
         username = simpledialog.askstring("Register", "Enter your username:")
         password = simpledialog.askstring("Register", "Enter your password:", show='*')
         if username and password:
-            self.network_handler.send_credentials(username, password, "1")
+            self.network_handler.send_credentials(username, password, "register")
             response = self.network_handler.get_response()
             messagebox.showinfo("Response", response)
 
@@ -52,7 +52,7 @@ class GUI_Window:
         username = simpledialog.askstring("Sign In", "Enter your username:")
         password = simpledialog.askstring("Sign In", "Enter your password:", show='*')
         if username and password:
-            self.network_handler.send_credentials(username, password, "2")
+            self.network_handler.send_credentials(username, password, "sign_in")
             response = self.network_handler.get_response()
             messagebox.showinfo("Response", response)
 

@@ -4,6 +4,7 @@ import pickle
 import sqlite3
 import protocol
 
+
 class Database:
     def __init__(self, db_name="users.db"):
         self.db_name = db_name
@@ -32,12 +33,14 @@ class Database:
     def close(self):
         self.conn.close()
 
+
 class ClientHandler(threading.Thread):
     def __init__(self, client_socket, address):
         super().__init__()
         self.client_socket = client_socket
         self.address = address
         self.protocol = protocol.Protocol(self.client_socket)
+        self.signed_in_clients = []
 
     def run(self):
         print(f"Accepted connection from {self.address}")
@@ -47,17 +50,19 @@ class ClientHandler(threading.Thread):
                 if data:
                     username, password, choice = pickle.loads(data)
                     db = Database()
-                    if choice == "1":  # Register
+                    if choice == "register":  # Register
                         existing_password = db.get_password(username)
                         if existing_password is None:
                             db.add_user(username, password)
                             response_msg = "User added successfully"
                         else:
                             response_msg = "Error: Username already exists"
-                    elif choice == "2":  # Sign in
+                    elif choice == "sign_in":  # Sign in
                         stored_password = db.get_password(username)
                         if stored_password == password:
                             response_msg = "Success: Logged in"
+                            self.signed_in_clients.append(self.client_socket)
+
                         else:
                             response_msg = "Error: Incorrect password"
                     else:
@@ -71,6 +76,7 @@ class ClientHandler(threading.Thread):
                 print(f"Connection lost with {self.address}")
                 break
         self.client_socket.close()
+
 
 class Server:
     def __init__(self, host="0.0.0.0", port=8888):
@@ -87,6 +93,7 @@ class Server:
             client_socket, addr = server_socket.accept()
             client_handler = ClientHandler(client_socket, addr)
             client_handler.start()
+
 
 if __name__ == "__main__":
     server = Server()
