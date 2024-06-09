@@ -1,6 +1,4 @@
-# client_cube.py
 import time
-
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *
@@ -11,8 +9,6 @@ import threading
 import protocol
 from scene import Scene
 import numpy as np
-
-
 
 def rotate_vector(eye, center, angle_degrees, axis):
     vector = center - eye
@@ -43,7 +39,6 @@ def rotate_vector(eye, center, angle_degrees, axis):
     dir_vector = np.dot(rotation_matrix, vector)
     return eye, eye+dir_vector
 
-
 class NetworkHandler:
     def __init__(self):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -62,7 +57,6 @@ class NetworkHandler:
                     self.scene = pickle.loads(data)
                     self.update = True
 
-
 class ClientViewer:
     EXIT = 0
 
@@ -73,8 +67,9 @@ class ClientViewer:
 
         # Graphic part
         pygame.init()
-        self.display = (800, 600)
-        pygame.display.set_mode(self.display, DOUBLEBUF | OPENGL)
+        info = pygame.display.Info()
+        self.display = (info.current_w, info.current_h)
+        pygame.display.set_mode(self.display, DOUBLEBUF | OPENGL | FULLSCREEN)
         self.scale_factor = 0.5
 
         self.eye = np.array([0, 0, 0])
@@ -89,12 +84,6 @@ class ClientViewer:
         self.scene = None
         self.fov_update = False
 
-    # def rotate_image(self, angle_degrees):
-    #     self.network.scene.screen.base_vertices = [
-    #         rotate_vector(vertex, angle_degrees, [0, 0, 1])
-    #         for vertex in self.network.scene.screen.base_vertices
-    #     ]
-
     def init_graphic(self):
         glMatrixMode(GL_PROJECTION)
         gluPerspective(120, (self.display[0] / self.display[1]), 0.1, 50.0)
@@ -107,6 +96,9 @@ class ClientViewer:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return True, ClientViewer.EXIT
+            elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                pygame.quit()
+                return True, ClientViewer.EXIT
         return False, None
 
     def iteration(self):
@@ -116,7 +108,6 @@ class ClientViewer:
             return cmd
 
         # Check for scene update
-
         if self.network.update:
             if self.fov != self.network.scene.fov:
                 self.fov = self.network.scene.fov
@@ -162,11 +153,9 @@ class ClientViewer:
                 break
             pygame.time.wait(20)
 
-
 def main():
     cview = ClientViewer()
     cview.handle()
-
 
 if __name__ == "__main__":
     main()
