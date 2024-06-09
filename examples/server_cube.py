@@ -51,9 +51,9 @@ def handle_client(client_socket, address, part):
 
 def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(("0.0.0.0", 9999))
+    server.bind(("0.0.0.0", 12345))
     server.listen(5)
-    print("Server listening on port 9999")
+    print("Server listening on port 12345   ")
 
     part = 0
     while True:

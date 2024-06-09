@@ -42,7 +42,7 @@ def rotate_vector(eye, center, angle_degrees, axis):
 class NetworkHandler:
     def __init__(self):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect(("127.0.0.1", 9999))
+        self.client_socket.connect(("127.0.0.1", 12345))
         self.proto = protocol.Protocol(self.client_socket)
         self.scene = None
         self.update = False

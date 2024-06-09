@@ -57,4 +57,3 @@ image_path = "new_images\\"
 stitch_images(image_list, output_path, output_path2)
 
 present_res(output_path, output_path2)
-print("a")
