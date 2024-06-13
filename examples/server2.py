@@ -18,14 +18,24 @@ class Database:
     def __init__(self, db_name="users.db"):
         self.db_name = db_name
         self.conn = sqlite3.connect(db_name)
-        self.create_table()
+        self.create_user_table()
+        self.create_scene_table()
 
-    def create_table(self):
+    def create_user_table(self):
         cursor = self.conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                           id INTEGER PRIMARY KEY,
                           username TEXT NOT NULL,
                           password TEXT NOT NULL)''')
+        self.conn.commit()
+
+    def create_scene_table(self):
+        cursor = self.conn.cursor()
+        cursor.execute('''CREATE TABLE IF NOT EXISTS scenes (
+                          id INTEGER PRIMARY KEY,
+                          username TEXT NOT NULL,
+                          scene BLOB NOT NULL,
+                          timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
         self.conn.commit()
 
     def add_user(self, username, password):
@@ -38,6 +48,16 @@ class Database:
         cursor.execute("SELECT password FROM users WHERE username=?", (username,))
         result = cursor.fetchone()
         return result[0] if result else None
+
+    def add_scene(self, username, scene):
+        cursor = self.conn.cursor()
+        cursor.execute("INSERT INTO scenes (username, scene) VALUES (?, ?)", (username, scene))
+        self.conn.commit()
+
+    def get_scenes(self, username):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT scene, timestamp FROM scenes WHERE username=? ORDER BY timestamp DESC", (username,))
+        return cursor.fetchall()
 
     def close(self):
         self.conn.close()
@@ -72,6 +92,16 @@ class ClientHandler(threading.Thread):
                             response_msg = "Success: Logged in"
                         else:
                             response_msg = "Error: Incorrect password"
+                    elif choice == "add_scene":  # Add scene
+                        scene_data = pickle.loads(data[1])
+                        db.add_scene(username, scene_data)
+                        response_msg = "Scene added successfully"
+                    elif choice == "get_scenes":  # Get scenes
+                        scenes = db.get_scenes(username)
+                        response_data = pickle.dumps(scenes)
+                        data = self.protocol.create_msg(response_data)
+                        self.client_socket.sendall(data)
+                        continue
                     else:
                         response_msg = "Error: Invalid choice"
                     db.close()

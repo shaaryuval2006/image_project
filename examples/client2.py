@@ -51,6 +51,24 @@ class NetworkHandler:
                     self.scene = pickle.loads(data)
                     self.update = True
 
+    def store_scene(self, username, scene):
+        obj = (username, "add_scene", pickle.dumps(scene))
+        data = pickle.dumps(obj)
+        message = self.proto.create_msg(data)
+        self.client_socket.sendall(message)
+
+    def retrieve_scenes(self, username):
+        obj = (username, "get_scenes")
+        data = pickle.dumps(obj)
+        message = self.proto.create_msg(data)
+        self.client_socket.sendall(message)
+        res, data = self.proto.get_msg()
+        if res:
+            scenes = pickle.loads(data)
+            return scenes
+        else:
+            return None
+
 
 class GUI_Window:
     def __init__(self, master):
