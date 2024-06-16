@@ -148,7 +148,8 @@ class SceneViewer:
         self.up = np.array([0, 1, 0])
 
         self.line_of_sight_angle = 0
-        self.fov = 120
+        self.num_screens = num_screens
+        self.fov = 360 / num_screens
         self.rotation_axis = np.array([0, 1, 0])
 
         self.scene = None
@@ -156,7 +157,7 @@ class SceneViewer:
 
     def init_graphic(self):
         glMatrixMode(GL_PROJECTION)
-        gluPerspective(120, (self.display[0] / self.display[1]), 0.1, 50.0)
+        gluPerspective(self.fov, (self.display[0] / self.display[1]), 0.1, 50.0)  # Set initial FOV here
         glMatrixMode(GL_MODELVIEW)
         gluLookAt(self.eye[0], self.eye[1], self.eye[2], self.center[0], self.center[1], self.center[2], self.up[0],
                   self.up[1], self.up[2])
@@ -189,7 +190,7 @@ class SceneViewer:
         if self.fov_update:
             glMatrixMode(GL_PROJECTION)
             glLoadIdentity()
-            gluPerspective(self.scene.fov, (self.display[0] / self.display[1]), 0.1, 50.0)
+            gluPerspective(self.fov, (self.display[0] / self.display[1]), 0.1, 50.0)
             glMatrixMode(GL_MODELVIEW)
             self.fov_update = False
 
@@ -205,7 +206,7 @@ class SceneViewer:
                       self.up[1], self.up[2])
 
             self.scene.draw()
-
+            print("FOV:", self.scene.fov)
             pygame.display.flip()
 
     def start_viewer(self):
