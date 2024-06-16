@@ -69,6 +69,7 @@ class Database:
 
 
 class ClientHandler(threading.Thread):
+
     def __init__(self, client_socket, address):
         super().__init__()
         self.client_socket = client_socket

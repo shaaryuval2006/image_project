@@ -6,13 +6,18 @@ import socket
 import protocol
 import time
 
+server_port = "0.0.0.0"
 
 class NetworkHandler:
+    global server_port
+
     def __init__(self, port):
+        global server_port
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect(("192.168.56.1", port))
+        self.client_socket.connect(("172.16.16.69", port))
         self.proto = protocol.Protocol(self.client_socket)
         self.scene = None
+        server_port = port
         self.update = False
 
     def send_credentials(self, username, password, choice):
@@ -30,7 +35,12 @@ class NetworkHandler:
         obj = (client_id, server_ip, server_port)
         data = pickle.dumps(obj)
         message = self.proto.create_msg(data)
-        self.client_socket.sendall(message)
+
+        # Connect to the screen client
+        screen_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        screen_client_socket.connect(("127.0.0.1", 8889))
+        screen_client_socket.sendall(message)
+        return screen_client_socket
 
     def get_response(self):
         while True:
@@ -69,7 +79,6 @@ class NetworkHandler:
         else:
             return None
 
-
 class GUI_Window:
     def __init__(self, master):
         self.master = master
@@ -98,6 +107,8 @@ class GUI_Window:
         self.sign_in_button = tk.Button(self.master, text="Sign In", command=self.sign_in, font=("helvetica", 16))
         self.sign_in_button.place(relx=0.35, rely=0.70, anchor="center")
 
+        self.screen_clients_sockets = []
+
     def login(self):
         self.username = self.username_entry.get()
         self.password = self.password_entry.get()
@@ -111,11 +122,12 @@ class GUI_Window:
                 self.network_handler.send_credentials(self.username, self.password, "register")
                 response = self.network_handler.get_response()
                 messagebox.showinfo("Registration", response)
-            self.master.destroy()  # Close the GUI window
+            self.master.withdraw()  # Hide the GUI window
         else:
             messagebox.showerror("Error", "Please enter both username and password.")
 
     def sign_in(self):
+        global server_port
         self.username = self.username_entry.get()
         self.password = self.password_entry.get()
 
@@ -125,9 +137,15 @@ class GUI_Window:
             messagebox.showinfo("Response", response)
             if "Success" in response:
                 num_screens = simpledialog.askinteger("Number of Screens", "Enter the number of screens:")
+
                 if num_screens is not None:
                     self.network_handler.send_number_of_screens(num_screens)
-                    self.master.destroy()
+                    client_id = self.password
+                    server_ip = "172.16.16.69"
+                    server_port = server_port
+                    s_client_sock = self.network_handler.send_client_info(client_id, server_ip, server_port)
+                    self.screen_clients_sockets.append(s_client_sock)
+                    self.master.withdraw()
         else:
             messagebox.showerror("Error", "Please enter both username and password.")
 

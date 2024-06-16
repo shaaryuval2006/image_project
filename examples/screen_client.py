@@ -8,7 +8,7 @@ import threading
 import numpy as np
 import pickle
 import socket
-
+import protocol
 
 class SceneDisplayClient:
     def __init__(self):
@@ -24,6 +24,7 @@ class SceneDisplayClient:
         pygame.init()
         pygame.display.set_mode(self.display, DOUBLEBUF | OPENGL)
         self.init_graphic()
+        self.proto = protocol.Protocol(None)  # Initialize the protocol without a socket for now
 
     def init_graphic(self):
         glMatrixMode(GL_PROJECTION)
@@ -54,27 +55,31 @@ class SceneDisplayClient:
         pygame.display.flip()
 
     def receive_scene(self):
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect(("127.0.0.1", 8888))
+        screen_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        screen_server_socket.bind(("127.0.0.1", 8889))
+        screen_server_socket.listen(5)
+
         while True:
+            client_socket, addr = screen_server_socket.accept()
             try:
                 data = client_socket.recv(1024)
                 if data:
-                    msg_len = int(data[:10])
-                    data = data[10:]
-                    while len(data) < msg_len:
-                        data += client_socket.recv(1024)
-                    if self.client_id is None or self.server_ip is None or self.server_port is None:
-                        client_id, server_ip, server_port = pickle.loads(data)
-                        self.client_id = client_id
-                        self.server_ip = server_ip
-                        self.server_port = server_port
-                    else:
-                        self.scene = pickle.loads(data)
-            except (ConnectionResetError, EOFError):
-                print("Connection lost with the server.")
+                    res, msg_len = self.proto.get_msg()
+                    if res:
+                        while len(data) < msg_len:
+                            data += client_socket.recv(msg_len - len(data))
+                        if self.client_id is None or self.server_ip is None or self.server_port is None:
+                            client_info = pickle.loads(data)
+                            self.client_id, self.server_ip, self.server_port = client_info
+                            print(f"Client ID: {self.client_id}, Server IP: {self.server_ip}, Server Port: {self.server_port}")
+                        else:
+                            self.scene = pickle.loads(data)
+                            print("Scene received and updated.")
+            except (ConnectionResetError, EOFError) as e:
+                print(f"Connection lost with the client: {e}")
                 break
-        client_socket.close()
+            client_socket.close()
+        screen_server_socket.close()
 
     def start_viewer(self):
         scene_thread = threading.Thread(target=self.receive_scene)
