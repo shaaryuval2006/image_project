@@ -92,7 +92,7 @@ class GUI_Window:
         self.password_entry = tk.Entry(self.master, show="*", font=("helvetica", 16))
         self.password_entry.place(relx=0.5, rely=0.55, anchor="center")
 
-        self.login_button = tk.Button(self.master, text="Login", command=self.login, font=("helvetica", 16))
+        self.login_button = tk.Button(self.master, text="Sign_Up", command=self.login, font=("helvetica", 16))
         self.login_button.place(relx=0.65, rely=0.70, anchor="center")
 
         self.sign_in_button = tk.Button(self.master, text="Sign In", command=self.sign_in, font=("helvetica", 16))
@@ -158,7 +158,8 @@ class SceneViewer:
         glMatrixMode(GL_PROJECTION)
         gluPerspective(120, (self.display[0] / self.display[1]), 0.1, 50.0)
         glMatrixMode(GL_MODELVIEW)
-        gluLookAt(self.eye[0], self.eye[1], self.eye[2], self.center[0], self.center[1], self.center[2], self.up[0], self.up[1], self.up[2])
+        gluLookAt(self.eye[0], self.eye[1], self.eye[2], self.center[0], self.center[1], self.center[2], self.up[0],
+                  self.up[1], self.up[2])
 
     def handle_pygame_events(self):
         for event in pygame.event.get():
@@ -200,7 +201,8 @@ class SceneViewer:
                 self.line_of_sight_angle = self.scene.line_of_sight_angle
 
             cur_eye, cur_center = rotate_vector(self.eye, self.center, self.line_of_sight_angle, self.rotation_axis)
-            gluLookAt(cur_eye[0], cur_eye[1], cur_eye[2], cur_center[0], cur_center[1], cur_center[2], self.up[0], self.up[1], self.up[2])
+            gluLookAt(cur_eye[0], cur_eye[1], cur_eye[2], cur_center[0], cur_center[1], cur_center[2], self.up[0],
+                      self.up[1], self.up[2])
 
             self.scene.draw()
 
