@@ -1,16 +1,10 @@
+# main_client.py
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 import pickle
 import socket
 import protocol
 import time
-import pygame
-from pygame.locals import *
-from OpenGL.GL import *
-from OpenGL.GLU import *
-import threading
-import numpy as np
-from scene import Scene
 
 
 class NetworkHandler:
@@ -111,6 +105,7 @@ class GUI_Window:
                 self.network_handler.send_credentials(self.username, self.password, "register")
                 response = self.network_handler.get_response()
                 messagebox.showinfo("Registration", response)
+            self.master.destroy()  # Close the GUI window
         else:
             messagebox.showerror("Error", "Please enter both username and password.")
 
@@ -126,129 +121,9 @@ class GUI_Window:
                 num_screens = simpledialog.askinteger("Number of Screens", "Enter the number of screens:")
                 if num_screens is not None:
                     self.network_handler.send_number_of_screens(num_screens)
-                    self.master.destroy()  # Close the login window and start the scene viewer
-                    SceneViewer(num_screens).start_viewer()
+                    self.master.destroy()  # Close the GUI window
         else:
             messagebox.showerror("Error", "Please enter both username and password.")
-
-
-class SceneViewer:
-    def __init__(self, num_screens):
-        self.network = NetworkHandler(12345)
-        self.rotation_axis = np.array([0, 0, 1])
-
-        pygame.init()
-        info = pygame.display.Info()
-        self.display = (info.current_w, info.current_h)
-        pygame.display.set_mode(self.display, DOUBLEBUF | OPENGL | FULLSCREEN)
-        self.scale_factor = 0.5
-
-        self.eye = np.array([0, 0, 0])
-        self.center = np.array([0, 0, 10])
-        self.up = np.array([0, 1, 0])
-
-        self.line_of_sight_angle = 0
-        self.num_screens = num_screens
-        self.fov = 360 / num_screens
-        self.rotation_axis = np.array([0, 1, 0])
-
-        self.scene = None
-        self.fov_update = False
-
-    def init_graphic(self):
-        glMatrixMode(GL_PROJECTION)
-        gluPerspective(self.fov, (self.display[0] / self.display[1]), 0.1, 50.0)  # Set initial FOV here
-        glMatrixMode(GL_MODELVIEW)
-        gluLookAt(self.eye[0], self.eye[1], self.eye[2], self.center[0], self.center[1], self.center[2], self.up[0],
-                  self.up[1], self.up[2])
-
-    def handle_pygame_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                return True, "EXIT"
-            elif event.type == KEYDOWN and event.key == K_ESCAPE:
-                pygame.quit()
-                return True, "EXIT"
-        return False, None
-
-    def iteration(self):
-        res, cmd = self.handle_pygame_events()
-        if res:
-            return cmd
-
-        if self.network.update:
-            if self.fov != self.network.scene.fov:
-                self.fov = self.network.scene.fov
-                self.fov_update = True
-            self.scene = self.network.scene
-            self.network.update = False
-
-        self.draw_scene()
-
-    def draw_scene(self):
-        if self.fov_update:
-            glMatrixMode(GL_PROJECTION)
-            glLoadIdentity()
-            gluPerspective(self.fov, (self.display[0] / self.display[1]), 0.1, 50.0)
-            glMatrixMode(GL_MODELVIEW)
-            self.fov_update = False
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glLoadIdentity()
-
-        if self.scene:
-            if self.scene.line_of_sight_angle is not None:
-                self.line_of_sight_angle = self.scene.line_of_sight_angle
-
-            cur_eye, cur_center = rotate_vector(self.eye, self.center, self.line_of_sight_angle, self.rotation_axis)
-            gluLookAt(cur_eye[0], cur_eye[1], cur_eye[2], cur_center[0], cur_center[1], cur_center[2], self.up[0],
-                      self.up[1], self.up[2])
-
-            self.scene.draw()
-            print("FOV:", self.scene.fov)
-            pygame.display.flip()
-
-    def start_viewer(self):
-        thread = threading.Thread(target=self.network.handle_scene)
-        thread.start()
-        self.init_graphic()
-
-        while True:
-            cmd = self.iteration()
-            if cmd == "EXIT":
-                break
-            pygame.time.wait(20)
-
-
-def rotate_vector(eye, center, angle_degrees, axis):
-    vector = center - eye
-    angle_radians = np.radians(angle_degrees)
-    cos_theta = np.cos(angle_radians)
-    sin_theta = np.sin(angle_radians)
-    u = np.array(axis)
-    u = u / np.linalg.norm(u)
-
-    rotation_matrix = np.array([
-        [
-            cos_theta + u[0] * u[0] * (1 - cos_theta),
-            u[0] * u[1] * (1 - cos_theta) - u[2] * sin_theta,
-            u[0] * u[2] * (1 - cos_theta) + u[1] * sin_theta
-        ],
-        [
-            u[1] * u[0] * (1 - cos_theta) + u[2] * sin_theta,
-            cos_theta + u[1] * u[1] * (1 - cos_theta),
-            u[1] * u[2] * (1 - cos_theta) - u[0] * sin_theta
-        ],
-        [
-            u[2] * u[0] * (1 - cos_theta) - u[1] * sin_theta,
-            u[2] * u[1] * (1 - cos_theta) + u[0] * sin_theta,
-            cos_theta + u[2] * u[2] * (1 - cos_theta)
-        ]
-    ])
-
-    dir_vector = np.dot(rotation_matrix, vector)
-    return eye, eye + dir_vector
 
 
 if __name__ == "__main__":
