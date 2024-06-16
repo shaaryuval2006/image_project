@@ -10,7 +10,7 @@ import time
 class NetworkHandler:
     def __init__(self, port):
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect(("127.0.0.1", port))
+        self.client_socket.connect(("192.168.56.1", port))
         self.proto = protocol.Protocol(self.client_socket)
         self.scene = None
         self.update = False
@@ -23,6 +23,12 @@ class NetworkHandler:
 
     def send_number_of_screens(self, num_screens):
         data = pickle.dumps(num_screens)
+        message = self.proto.create_msg(data)
+        self.client_socket.sendall(message)
+
+    def send_client_info(self, client_id, server_ip, server_port):
+        obj = (client_id, server_ip, server_port)
+        data = pickle.dumps(obj)
         message = self.proto.create_msg(data)
         self.client_socket.sendall(message)
 
@@ -121,7 +127,7 @@ class GUI_Window:
                 num_screens = simpledialog.askinteger("Number of Screens", "Enter the number of screens:")
                 if num_screens is not None:
                     self.network_handler.send_number_of_screens(num_screens)
-                    self.master.destroy()  # Close the GUI window
+                    self.master.destroy()
         else:
             messagebox.showerror("Error", "Please enter both username and password.")
 

@@ -17,6 +17,10 @@ class SceneDisplayClient:
         self.rotation_axis = np.array([0, 0, 1])
         self.fov = 120  # Initial FOV, you can change this if needed
 
+        self.client_id = None
+        self.server_ip = None
+        self.server_port = None
+
         pygame.init()
         pygame.display.set_mode(self.display, DOUBLEBUF | OPENGL)
         self.init_graphic()
@@ -51,7 +55,7 @@ class SceneDisplayClient:
 
     def receive_scene(self):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_socket.connect(("127.0.0.1", 12345))  # Assuming the server is running on localhost
+        client_socket.connect(("127.0.0.1", 8888))
         while True:
             try:
                 data = client_socket.recv(1024)
@@ -60,7 +64,13 @@ class SceneDisplayClient:
                     data = data[10:]
                     while len(data) < msg_len:
                         data += client_socket.recv(1024)
-                    self.scene = pickle.loads(data)
+                    if self.client_id is None or self.server_ip is None or self.server_port is None:
+                        client_id, server_ip, server_port = pickle.loads(data)
+                        self.client_id = client_id
+                        self.server_ip = server_ip
+                        self.server_port = server_port
+                    else:
+                        self.scene = pickle.loads(data)
             except (ConnectionResetError, EOFError):
                 print("Connection lost with the server.")
                 break

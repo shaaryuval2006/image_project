@@ -82,7 +82,7 @@ class ClientHandler(threading.Thread):
         while True:
             try:
                 res, data = self.protocol.get_msg()
-                if data:
+                if res:
                     username, password, choice = pickle.loads(data)
                     db = Database()
                     if choice == "register":  # Register
