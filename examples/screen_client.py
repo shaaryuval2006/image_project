@@ -62,6 +62,7 @@ class SceneDisplayClient:
         while True:
             client_socket, addr = screen_server_socket.accept()
             try:
+                self.proto = protocol.Protocol(client_socket)
                 data = client_socket.recv(1024)
                 if data:
                     res, msg_len = self.proto.get_msg()
