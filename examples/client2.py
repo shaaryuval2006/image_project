@@ -9,8 +9,6 @@ import time
 server_port = "0.0.0.0"
 
 class NetworkHandler:
-    global server_port
-
     def __init__(self, port):
         global server_port
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,8 +24,9 @@ class NetworkHandler:
         message = self.proto.create_msg(data)
         self.client_socket.sendall(message)
 
-    def send_number_of_screens(self, num_screens):
-        data = pickle.dumps(num_screens)
+    def send_number_of_screens(self, username, num_screens):
+        obj = (username, num_screens)
+        data = pickle.dumps(obj)
         message = self.proto.create_msg(data)
         self.client_socket.sendall(message)
 
@@ -46,10 +45,14 @@ class NetworkHandler:
         while True:
             res, data = self.proto.get_msg()
             if res:
-                msg = pickle.loads(data)
-                return msg
+                try:
+                    msg = pickle.loads(data)
+                    return msg
+                except pickle.UnpicklingError as e:
+                    print(f"UnpicklingError: {e}")
+                    return None
             else:
-                return data
+                return None
 
     def handle_scene(self):
         while True:
@@ -58,8 +61,11 @@ class NetworkHandler:
             else:
                 res, data = self.proto.get_msg()
                 if res:
-                    self.scene = pickle.loads(data)
-                    self.update = True
+                    try:
+                        self.scene = pickle.loads(data)
+                        self.update = True
+                    except pickle.UnpicklingError as e:
+                        print(f"UnpicklingError in handle_scene: {e}")
 
     def store_scene(self, username, scene):
         obj = (username, "add_scene", pickle.dumps(scene))
@@ -74,8 +80,12 @@ class NetworkHandler:
         self.client_socket.sendall(message)
         res, data = self.proto.get_msg()
         if res:
-            scenes = pickle.loads(data)
-            return scenes
+            try:
+                scenes = pickle.loads(data)
+                return scenes
+            except pickle.UnpicklingError as e:
+                print(f"UnpicklingError in retrieve_scenes: {e}")
+                return None
         else:
             return None
 
@@ -139,7 +149,7 @@ class GUI_Window:
                 num_screens = simpledialog.askinteger("Number of Screens", "Enter the number of screens:")
 
                 if num_screens is not None:
-                    self.network_handler.send_number_of_screens(num_screens)
+                    self.network_handler.send_number_of_screens(self.username, num_screens)
                     client_id = self.password
                     server_ip = "172.16.16.69"
                     server_port = server_port

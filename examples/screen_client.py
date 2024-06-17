@@ -11,9 +11,9 @@ import protocol
 class SceneDisplayClient:
     def __init__(self):
         self.scene = None
-        self.display = (800, 600)  # You can set your desired display resolution here
+        self.display = (800, 600)  # Desired display resolution
         self.rotation_axis = np.array([0, 0, 1])
-        self.fov = 120  # Initial FOV, you can change this if needed
+        self.fov = 120  # Initial FOV
 
         self.client_id = None
         self.server_ip = None
@@ -23,6 +23,9 @@ class SceneDisplayClient:
         pygame.display.set_mode(self.display, DOUBLEBUF | OPENGL)
         self.init_graphic()
         self.proto = protocol.Protocol(None)  # Initialize the protocol without a socket for now
+
+        self.server_thread = None
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def init_graphic(self):
         glMatrixMode(GL_PROJECTION)
@@ -52,20 +55,21 @@ class SceneDisplayClient:
 
         pygame.display.flip()
 
-    def send_id_to_server(self):
-        try:
-            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server_socket.connect((self.server_ip, self.server_port))
-            self.proto = protocol.Protocol(server_socket)
-            message = self.proto.create_msg(pickle.dumps(self.client_id))
-            server_socket.sendall(message)
-            server_socket.close()
-        except Exception as e:
-            print(f"Failed to send client ID to the server: {e}")
+    def receive_server_actions(self):
+        self.server_socket.connect((self.server_ip, self.server_port))
+        self.proto = protocol.Protocol(self.server_socket)
+        message = self.proto.create_msg(pickle.dumps(self.client_id))
+        self.server_socket.sendall(message)
 
-    def receive_scene(self):
+        while True:
+            res, msg = self.proto.get_msg()
+            print(res)
+            if res:
+                print(msg)
+
+    def receive_main_client_action(self): # waiting for main client
         screen_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        screen_server_socket.bind(("127.0.0.1", 8889))
+        screen_server_socket.bind(("0.0.0.0", 8889))
         screen_server_socket.listen(5)
 
         while True:
@@ -78,10 +82,15 @@ class SceneDisplayClient:
                         client_info = pickle.loads(msg)
                         self.client_id, self.server_ip, self.server_port = client_info
                         print(f"Client ID: {self.client_id}, Server IP: {self.server_ip}, Server Port: {self.server_port}")
-                        self.send_id_to_server()  # Send the client ID to the server
-                    else:
-                        self.scene = pickle.loads(msg)
-                        print("Scene received and updated.")
+
+                        # start thread with server:
+                        # 1. Send the client ID to the server
+                        # 2. wait for commands...
+                        if self.server_thread:
+                            self.server_thread = threading.Thread(target=self.receive_server_actions)
+                            self.server_thread.start()
+
+
             except (ConnectionResetError, EOFError) as e:
                 print(f"Connection lost with the client: {e}")
                 break
@@ -89,7 +98,8 @@ class SceneDisplayClient:
         screen_server_socket.close()
 
     def start_viewer(self):
-        scene_thread = threading.Thread(target=self.receive_scene)
+
+        scene_thread = threading.Thread(target=self.receive_main_client_action)
         scene_thread.start()
 
         while True:
