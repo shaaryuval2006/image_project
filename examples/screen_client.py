@@ -54,6 +54,17 @@ class SceneDisplayClient:
 
         pygame.display.flip()
 
+    def send_id_to_server(self):
+        try:
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.connect((self.server_ip, self.server_port))
+            self.proto = protocol.Protocol(server_socket)
+            message = self.proto.create_msg(pickle.dumps(self.client_id))
+            server_socket.sendall(message)
+            server_socket.close()
+        except Exception as e:
+            print(f"Failed to send client ID to the server: {e}")
+
     def receive_scene(self):
         screen_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         screen_server_socket.bind(("127.0.0.1", 8889))
@@ -63,19 +74,16 @@ class SceneDisplayClient:
             client_socket, addr = screen_server_socket.accept()
             try:
                 self.proto = protocol.Protocol(client_socket)
-                data = client_socket.recv(1024)
-                if data:
-                    res, msg_len = self.proto.get_msg()
-                    if res:
-                        while len(data) < msg_len:
-                            data += client_socket.recv(msg_len - len(data))
-                        if self.client_id is None or self.server_ip is None or self.server_port is None:
-                            client_info = pickle.loads(data)
-                            self.client_id, self.server_ip, self.server_port = client_info
-                            print(f"Client ID: {self.client_id}, Server IP: {self.server_ip}, Server Port: {self.server_port}")
-                        else:
-                            self.scene = pickle.loads(data)
-                            print("Scene received and updated.")
+                res, msg = self.proto.get_msg()
+                if res:
+                    if self.client_id is None or self.server_ip is None or self.server_port is None:
+                        client_info = pickle.loads(msg)
+                        self.client_id, self.server_ip, self.server_port = client_info
+                        print(f"Client ID: {self.client_id}, Server IP: {self.server_ip}, Server Port: {self.server_port}")
+                        self.send_id_to_server()  # Send the client ID to the server
+                    else:
+                        self.scene = pickle.loads(msg)
+                        print("Scene received and updated.")
             except (ConnectionResetError, EOFError) as e:
                 print(f"Connection lost with the client: {e}")
                 break
