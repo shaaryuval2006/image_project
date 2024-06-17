@@ -140,11 +140,12 @@ class ClientHandler(threading.Thread):
                                     data = pickle.dumps(scene)
                                     message = self.protocol.create_msg(data)
                                     self.client_socket.sendall(message)
-                    elif isinstance(message, int):  # Handle client ID from screen client
+                    elif isinstance(message, int):
                         client_id = message
                         print(f"Received client ID from screen client: {client_id}")
                     else:
-                        print("Received an unknown message format.")
+                        client_id = message
+                        print(f"Received an unknown message format. : {client_id}")
             except (ConnectionResetError, BrokenPipeError):
                 print(f"Connection lost with {self.address}")
                 break
