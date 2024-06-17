@@ -10,7 +10,7 @@ class Protocol:
             return False, "Connection Error"
 
         try:
-            datalen = int(data.decode().strip())
+            datalen = int(data.decode())
         except ValueError:
             return False, "Message Error"
 

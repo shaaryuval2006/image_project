@@ -1,5 +1,3 @@
-# scene_display_client.py
-
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *
