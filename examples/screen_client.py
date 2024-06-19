@@ -10,7 +10,10 @@ import protocol
 
 class SceneDisplayClient:
     def __init__(self):
+        self.scene_locker = threading.Lock()
         self.scene = None
+        self.next_scene = None
+
         self.display = (800, 600)  # Desired display resolution
         self.rotation_axis = np.array([0, 0, 1])
         self.fov = 120  # Initial FOV
@@ -58,7 +61,7 @@ class SceneDisplayClient:
     def receive_server_actions(self):
         self.server_socket.connect((self.server_ip, self.server_port))
         self.proto = protocol.Protocol(self.server_socket)
-        message = self.proto.create_msg(pickle.dumps(self.client_id))
+        message = self.proto.create_msg(pickle.dumps(("screen_connect", self.client_id)))
         self.server_socket.sendall(message)
 
         while True:
@@ -66,6 +69,12 @@ class SceneDisplayClient:
             print(res)
             if res:
                 print(msg)
+                cmd, data = pickle.loads(msg)
+                if cmd == "scene":
+                    self.scene_locker.acquire()
+                    self.next_scene = data
+                    self.scene_locker.release()
+
 
     def receive_main_client_action(self): # waiting for main client
         screen_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -86,7 +95,7 @@ class SceneDisplayClient:
                         # start thread with server:
                         # 1. Send the client ID to the server
                         # 2. wait for commands...
-                        if self.server_thread:
+                        if self.server_thread is None:
                             self.server_thread = threading.Thread(target=self.receive_server_actions)
                             self.server_thread.start()
 
@@ -105,6 +114,12 @@ class SceneDisplayClient:
         while True:
             if self.handle_pygame_events():
                 break
+
+            self.scene_locker.acquire()
+            if self.next_scene is not None:
+                self.scene = self.next_scene
+                self.next_scene = None
+            self.scene_locker.release()
             self.draw_scene()
             pygame.time.wait(20)
 

@@ -1,4 +1,3 @@
-# server2.py
 import socket
 import threading
 import pickle
@@ -58,6 +57,12 @@ class Database:
         cursor.execute("INSERT INTO scenes (user_id, scene) VALUES (?, ?)", (user_id, scene_data))
         self.conn.commit()
 
+    def get_latest_scene(self, user_id):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT scene FROM scenes WHERE user_id=? ORDER BY timestamp DESC LIMIT 1", (user_id,))
+        result = cursor.fetchone()
+        return result[0] if result else None
+
     def get_scenes(self, username):
         cursor = self.conn.cursor()
         cursor.execute("SELECT scene, timestamp FROM scenes WHERE user_id=(SELECT id FROM users WHERE username=?) ORDER BY timestamp DESC", (username,))
@@ -86,8 +91,17 @@ class ClientHandler(threading.Thread):
                     except pickle.UnpicklingError as e:
                         print(f"UnpicklingError: {e}")
                         continue
-                    print(message, "this is te message")
-                    if isinstance(message, tuple) and len(message) == 3:
+
+                    #main client
+                    print(message, "this is the message")
+                    if not isinstance(message, tuple):
+                        print(f"Received an unknown message format: {message}")
+                        self.client_socket.sendall(b"Invalid username")
+                        self.client_socket.close()
+                        return
+
+                    print(f"message len = {len(message)}")
+                    if len(message) == 3:
                         username, password, choice = message
                         db = Database()
                         if choice == "register":  # Register
@@ -113,11 +127,10 @@ class ClientHandler(threading.Thread):
                         elif choice == "get_scenes":  # Get scenes
                             scenes = db.get_scenes(username)
                             response_msg = scenes
-                        elif choice == "num_of_screens":
+                        elif choice == "number_of_screens":
                             num_screens = pickle.loads(data)
                             print(f"User {username} has {num_screens} screens")
                             self.signed_in_users.append((username, id, num_screens))
-                            print(self.signed_in_users)
                             continue
                         else:
                             response_msg = "Error: Invalid choice"
@@ -127,14 +140,23 @@ class ClientHandler(threading.Thread):
                         message = self.protocol.create_msg(data)
                         self.client_socket.sendall(message)
 
-                    elif isinstance(message, tuple) and len(message) == 2:
+                    #screen client
+                    elif len(message) == 2:
                         cmd, data = message
-                        if cmd == "client_id":
-                            client_id = pickle.loads(data)
+
+                        if cmd == "screen_connect":
+                            db = Database()
+                            client_id = data
+
+                            print("yuval", self.signed_in_users)
                             for user_details in self.signed_in_users:
+                                print(f"user details {user_details}, client_id {client_id}")
                                 if user_details[0] == client_id:
                                     try:
-                                        message = self.protocol.create_msg(data)
+                                        user_id = user_details[1]
+                                        scene_data = db.get_latest_scene(user_id)
+                                        print("eli")
+                                        message = self.protocol.create_msg(pickle.dumps(("scene", scene_data)))
                                         self.client_socket.sendall(message)
                                     except Exception as e:
                                         print(f"Failed to send scene to screen client: {e}")
@@ -142,13 +164,16 @@ class ClientHandler(threading.Thread):
                                     self.client_socket.sendall(b"Don't Know You")
                                     self.client_socket.close()
                                     return
-                            print(f"Received an unknown message format: {client_id}")
-                        else:
-                            print(f"Received an unknown message format: {message}")
+                            print(f"Received a message for username: {client_id}")
+
+                            db.close()
+                    else:
+                        print(message)
             except (ConnectionResetError, BrokenPipeError):
                 print(f"Connection lost with {self.address}")
                 break
         self.client_socket.close()
+
 
 def start_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -160,6 +185,7 @@ def start_server():
         client_socket, addr = server.accept()
         client_handler = ClientHandler(client_socket, addr, assigned_clients)
         client_handler.start()
+
 
 if __name__ == "__main__":
     start_server()

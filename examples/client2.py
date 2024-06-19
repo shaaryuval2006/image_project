@@ -24,8 +24,8 @@ class NetworkHandler:
         message = self.proto.create_msg(data)
         self.client_socket.sendall(message)
 
-    def send_number_of_screens(self, username, num_screens):
-        obj = (username, num_screens)
+    def send_number_of_screens(self, username, num_screens, choice):
+        obj = (username, num_screens, choice)
         data = pickle.dumps(obj)
         message = self.proto.create_msg(data)
         self.client_socket.sendall(message)
@@ -111,7 +111,7 @@ class GUI_Window:
         self.password_entry = tk.Entry(self.master, show="*", font=("helvetica", 16))
         self.password_entry.place(relx=0.5, rely=0.55, anchor="center")
 
-        self.login_button = tk.Button(self.master, text="Sign_Up", command=self.login, font=("helvetica", 16))
+        self.login_button = tk.Button(self.master, text="Sign_Up", command=self.sign_up, font=("helvetica", 16))
         self.login_button.place(relx=0.65, rely=0.70, anchor="center")
 
         self.sign_in_button = tk.Button(self.master, text="Sign In", command=self.sign_in, font=("helvetica", 16))
@@ -119,7 +119,7 @@ class GUI_Window:
 
         self.screen_clients_sockets = []
 
-    def login(self):
+    def sign_up(self):
         self.username = self.username_entry.get()
         self.password = self.password_entry.get()
 
@@ -149,8 +149,8 @@ class GUI_Window:
                 num_screens = simpledialog.askinteger("Number of Screens", "Enter the number of screens:")
 
                 if num_screens is not None:
-                    self.network_handler.send_number_of_screens(self.username, num_screens)
-                    client_id = self.password
+                    self.network_handler.send_number_of_screens(self.username, num_screens, "number_of_screens")
+                    client_id = self.username
                     server_ip = "172.16.16.69"
                     server_port = server_port
                     s_client_sock = self.network_handler.send_client_info(client_id, server_ip, server_port)
