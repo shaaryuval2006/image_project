@@ -7,6 +7,7 @@ import numpy as np
 import pickle
 import socket
 import protocol
+from scene import  Scene
 
 class SceneDisplayClient:
     def __init__(self):
@@ -52,7 +53,7 @@ class SceneDisplayClient:
 
         if self.scene:
             glPushMatrix()
-            glRotatef(self.scene.line_of_sight_angle, *self.rotation_axis)
+            glRotatef(self.scene.line_of_sight_angle, self.rotation_axis[0], self.rotation_axis[1], self.rotation_axis[2])
             self.scene.draw()
             glPopMatrix()
 
@@ -66,17 +67,15 @@ class SceneDisplayClient:
 
         while True:
             res, msg = self.proto.get_msg()
-            print(res)
             if res:
-                print(msg)
                 cmd, data = pickle.loads(msg)
                 if cmd == "scene":
-                    self.scene_locker.acquire()
-                    self.next_scene = data
-                    self.scene_locker.release()
+                    scene_data = pickle.loads(data)  # Deserialize the scene data
+                    if isinstance(scene_data, Scene):
+                        with self.scene_locker:
+                            self.next_scene = scene_data
 
-
-    def receive_main_client_action(self): # waiting for main client
+    def receive_main_client_action(self):  # waiting for main client
         screen_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         screen_server_socket.bind(("0.0.0.0", 8889))
         screen_server_socket.listen(5)
@@ -99,7 +98,6 @@ class SceneDisplayClient:
                             self.server_thread = threading.Thread(target=self.receive_server_actions)
                             self.server_thread.start()
 
-
             except (ConnectionResetError, EOFError) as e:
                 print(f"Connection lost with the client: {e}")
                 break
@@ -107,7 +105,6 @@ class SceneDisplayClient:
         screen_server_socket.close()
 
     def start_viewer(self):
-
         scene_thread = threading.Thread(target=self.receive_main_client_action)
         scene_thread.start()
 
@@ -115,14 +112,12 @@ class SceneDisplayClient:
             if self.handle_pygame_events():
                 break
 
-            self.scene_locker.acquire()
-            if self.next_scene is not None:
-                self.scene = self.next_scene
-                self.next_scene = None
-            self.scene_locker.release()
+            with self.scene_locker:
+                if self.next_scene is not None:
+                    self.scene = self.next_scene
+                    self.next_scene = None
             self.draw_scene()
             pygame.time.wait(20)
-
 
 if __name__ == "__main__":
     viewer = SceneDisplayClient()

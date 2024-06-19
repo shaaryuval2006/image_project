@@ -1,5 +1,5 @@
 from OpenGL.GL import *
-from OpenGL.GLU import *
+#from OpenGL.GLU import *
 from PIL import Image
 
 
@@ -90,7 +90,7 @@ class Cube:
 
 
 class Scene:
-    def __init__(self, texture_coords =((0, 0), (0, 1), (1, 0), (1, 1)), line_of_sight_angle=(1, 0, 0), fov=120):
+    def __init__(self, texture_coords =((0, 0), (0, 1), (1, 0), (1, 1)), line_of_sight_angle=0, fov=120):
         self.objs = []
         self.screen = Screen(0, texture_coords)
         # Position the first cube on the left
