@@ -22,7 +22,8 @@ class Database:
         cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                           id INTEGER PRIMARY KEY,
                           username TEXT NOT NULL,
-                          password TEXT NOT NULL)''')
+                          password TEXT NOT NULL,
+                          fov REAL DEFAULT 120.0)''')  # Add FOV column with a default value
         self.conn.commit()
 
     def create_scene_table(self):
@@ -35,9 +36,9 @@ class Database:
                           FOREIGN KEY(user_id) REFERENCES users(id))''')
         self.conn.commit()
 
-    def add_user(self, username, password):
+    def add_user(self, username, password, fov=120.0):
         cursor = self.conn.cursor()
-        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        cursor.execute("INSERT INTO users (username, password, fov) VALUES (?, ?, ?)", (username, password, fov))
         self.conn.commit()
 
     def get_password(self, username):
@@ -148,24 +149,17 @@ class ClientHandler(threading.Thread):
                             db = Database()
                             client_id = data
 
-                            print("yuval", self.signed_in_users)
                             for user_details in self.signed_in_users:
-                                print(f"user details {user_details}, client_id {client_id}")
                                 if user_details[0] == client_id:
                                     try:
                                         user_id = user_details[1]
                                         scene_data = db.get_latest_scene(user_id)
-                                        print("eli")
-                                        message = self.protocol.create_msg(pickle.dumps(("scene", scene_data)))
+                                        user_fov = db.get_user_fov(client_id)  # Fetch FOV from database
+                                        message = self.protocol.create_msg(
+                                            pickle.dumps(("scene", scene_data, user_fov)))
                                         self.client_socket.sendall(message)
                                     except Exception as e:
                                         print(f"Failed to send scene to screen client: {e}")
-                                else:
-                                    self.client_socket.sendall(b"Don't Know You")
-                                    self.client_socket.close()
-                                    return
-                            print(f"Received a message for username: {client_id}")
-
                             db.close()
                     else:
                         print(message)
