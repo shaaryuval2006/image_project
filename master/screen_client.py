@@ -77,8 +77,14 @@ class SceneDisplayClient:
                     if isinstance(scene_data, Scene):
                         with self.scene_locker:
                             self.next_scene = scene_data
+                elif cmd == "fov":
+                    self.fov = data  # Update FOV based on received data
+                    glMatrixMode(GL_PROJECTION)
+                    glLoadIdentity()
+                    gluPerspective(self.fov, (self.display[0] / self.display[1]), 0.1, 50.0)
+                    glMatrixMode(GL_MODELVIEW)
 
-    def receive_main_client_action(self):  # waiting for main client
+    def receive_main_client_action(self):
         screen_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         screen_server_socket.bind(("0.0.0.0", 8889))
         screen_server_socket.listen(5)
@@ -94,9 +100,9 @@ class SceneDisplayClient:
                         self.client_id, self.server_ip, self.server_port = client_info
                         print(f"Client ID: {self.client_id}, Server IP: {self.server_ip}, Server Port: {self.server_port}")
 
-                        # start thread with server:
+                        # Start thread with server:
                         # 1. Send the client ID to the server
-                        # 2. wait for commands...
+                        # 2. Wait for commands...
                         if self.server_thread is None:
                             self.server_thread = threading.Thread(target=self.receive_server_actions)
                             self.server_thread.start()
