@@ -7,7 +7,7 @@ import numpy as np
 import pickle
 import socket
 import protocol
-from scene import  Scene
+from scene import Scene
 
 
 class SceneDisplayClient:
@@ -23,6 +23,9 @@ class SceneDisplayClient:
         self.client_id = None
         self.server_ip = None
         self.server_port = None
+        self.hostname = socket.gethostname()
+        self.My_IP = socket.gethostbyname(self.hostname)
+        print(f"my_ip = {self.My_IP}")
 
         pygame.init()
         pygame.display.set_mode(self.display, DOUBLEBUF | OPENGL)
@@ -118,6 +121,7 @@ class SceneDisplayClient:
                     self.next_scene = None
             self.draw_scene()
             pygame.time.wait(100)
+
 
 if __name__ == "__main__":
     viewer = SceneDisplayClient()

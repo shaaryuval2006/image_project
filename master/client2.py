@@ -31,16 +31,21 @@ class NetworkHandler:
         message = self.proto.create_msg(data)
         self.client_socket.sendall(message)
 
-    def send_client_info(self, client_id, server_ip, server_port):
+    def send_client_info(self, client_id, server_ip, server_port, ip_list):
         obj = (client_id, server_ip, server_port)
         data = pickle.dumps(obj)
         message = self.proto.create_msg(data)
 
-        # Connect to the screen client
-        screen_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        screen_client_socket.connect(("127.0.0.1", 8889))
-        screen_client_socket.sendall(message)
-        return screen_client_socket
+        screen_clients_sockets = []
+        for ip in ip_list:
+            screen_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                screen_client_socket.connect((ip, 8889))
+                screen_client_socket.sendall(message)
+                screen_clients_sockets.append(screen_client_socket)
+            except socket.error as e:
+                print(f"Connection to {ip} failed: {e}")
+        return screen_clients_sockets
 
     def get_response(self):
         while True:
@@ -152,14 +157,39 @@ class GUI_Window:
 
                 if num_screens is not None:
                     self.network_handler.send_number_of_screens(self.username, num_screens, "number_of_screens")
-                    client_id = self.username
-                    server_ip = "172.16.16.69"
-                    server_port = server_port
-                    s_client_sock = self.network_handler.send_client_info(client_id, server_ip, server_port)
-                    self.screen_clients_sockets.append(s_client_sock)
-                    self.master.withdraw()
+                    self.open_ip_input_window(num_screens)
         else:
             messagebox.showerror("Error", "Please enter both username and password.")
+
+    def open_ip_input_window(self, num_screens):
+        ip_window = tk.Toplevel(self.master)
+        ip_window.title("Enter IP Addresses")
+        ip_window.geometry('400x400')
+
+        ip_entries = []
+
+        for i in range(num_screens):
+            label = tk.Label(ip_window, text=f"Enter IP address for screen {i + 1}:", font=("helvetica", 12))
+            label.pack(pady=5)
+            entry = tk.Entry(ip_window, font=("helvetica", 12))
+            entry.pack(pady=5)
+            ip_entries.append(entry)
+
+        submit_button = tk.Button(ip_window, text="Submit", command=lambda: self.submit_ips(ip_window, ip_entries), font=("helvetica", 12))
+        submit_button.pack(pady=20)
+
+    def submit_ips(self, ip_window, ip_entries):
+        ip_list = [entry.get() for entry in ip_entries if entry.get()]
+        if len(ip_list) == len(ip_entries):
+            client_id = self.username
+            server_ip = "172.16.16.69"
+            global server_port
+            s_client_sockets = self.network_handler.send_client_info(client_id, server_ip, server_port, ip_list)
+            self.screen_clients_sockets.extend(s_client_sockets)
+            ip_window.destroy()
+            self.master.withdraw()
+        else:
+            messagebox.showerror("Error", "Please enter all IP addresses.")
 
 
 if __name__ == "__main__":
