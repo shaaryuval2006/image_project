@@ -66,7 +66,7 @@ class SceneDisplayClient:
         self.server_socket.sendall(message)
 
         while True:
-            res, msg = self.proto.get_msg()
+            res, msg, fov = self.proto.get_msg()
             if res:
                 cmd, data = pickle.loads(msg)
                 if cmd == "scene":
@@ -74,6 +74,7 @@ class SceneDisplayClient:
                     if isinstance(scene_data, Scene):
                         with self.scene_locker:
                             self.next_scene = scene_data
+                            self.fov = fov
 
     def receive_main_client_action(self):  # waiting for main client
         screen_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -118,6 +119,7 @@ class SceneDisplayClient:
                     self.next_scene = None
             self.draw_scene()
             pygame.time.wait(100)
+
 
 if __name__ == "__main__":
     viewer = SceneDisplayClient()
