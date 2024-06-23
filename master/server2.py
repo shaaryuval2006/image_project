@@ -156,7 +156,7 @@ class ClientHandler(threading.Thread):
                                         user_id = user_details[1]
                                         scene_data = db.get_latest_scene(user_id)
                                         print("eli")
-                                        message = self.protocol.create_msg(pickle.dumps(("scene", scene_data, 360/num_screens)))
+                                        message = self.protocol.create_msg(pickle.dumps(("scene", scene_data)))
                                         self.client_socket.sendall(message)
                                     except Exception as e:
                                         print(f"Failed to send scene to screen client: {e}")

@@ -103,11 +103,9 @@ class Cube:
         for face in self.faces:
             glColor3f(self.face_colors[i_face][0], self.face_colors[i_face][1], self.face_colors[i_face][2])
             i_face += 1
-            print(f"face = {face}")
             for edge_map in face:
                 edge_id, vertex_in_edge = edge_map
                 vertex = self.edges[edge_id][vertex_in_edge]
-                print(f"vertex = {vertex}")
 
                 glVertex3f(self.vertices[vertex][0] + self.translation[0],
                            self.vertices[vertex][1] + self.translation[1],
