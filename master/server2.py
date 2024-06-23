@@ -151,7 +151,9 @@ class ClientHandler(threading.Thread):
 
                         if cmd_params[0] == "get_scenes":  # Get scenes
                             scenes = db.get_scenes(username)
-                            response_msg = scenes ###todo!?!
+                            # mytodo !?!
+                            response_msg = scenes
+
                         elif cmd_params[0] == "screen_connect":
                             db = Database()
                             client_id = cmd_params[1]
