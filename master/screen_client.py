@@ -70,11 +70,10 @@ class SceneDisplayClient:
             if res:
                 cmd, data = pickle.loads(msg)
                 if cmd == "scene":
-                    scene_data, fov = pickle.loads(data)  # Deserialize the scene data and FOV
+                    scene_data = pickle.loads(data)  # Deserialize the scene data
                     if isinstance(scene_data, Scene):
                         with self.scene_locker:
                             self.next_scene = scene_data
-                            self.fov = fov  # Update FOV
 
     def receive_main_client_action(self):  # waiting for main client
         screen_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -119,7 +118,6 @@ class SceneDisplayClient:
                     self.next_scene = None
             self.draw_scene()
             pygame.time.wait(100)
-
 
 if __name__ == "__main__":
     viewer = SceneDisplayClient()
