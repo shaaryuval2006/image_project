@@ -2,7 +2,7 @@ import socket
 import threading
 import pickle
 import sqlite3
-import protocol
+from master import protocol
 
 
 class Database:

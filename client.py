@@ -1,10 +1,7 @@
-import time
-
 import select
 import socket
 import pygame
-import sys
-import protocol
+from master import protocol
 import pickle
 
 

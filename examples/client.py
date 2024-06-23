@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import simpledialog, messagebox
 import pickle
 import socket
-import protocol
+from master import protocol
 
 
 class NetworkHandler:

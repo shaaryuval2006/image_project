@@ -51,7 +51,6 @@ class SceneDisplayClient:
     def draw_scene(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
-
         if self.scene:
             glPushMatrix()
             glRotatef(self.scene.line_of_sight_angle, self.rotation_axis[0], self.rotation_axis[1], self.rotation_axis[2])
@@ -118,7 +117,7 @@ class SceneDisplayClient:
                     self.scene = self.next_scene
                     self.next_scene = None
             self.draw_scene()
-            pygame.time.wait(20)
+            pygame.time.wait(100)
 
 if __name__ == "__main__":
     viewer = SceneDisplayClient()

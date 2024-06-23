@@ -13,7 +13,7 @@ class NetworkHandler:
     def __init__(self, port):
         global server_port
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect(("10.0.0.19", port))
+        self.client_socket.connect(("172.16.16.69", port))
         self.proto = protocol.Protocol(self.client_socket)
         self.scene = None
         server_port = port
@@ -153,7 +153,7 @@ class GUI_Window:
                 if num_screens is not None:
                     self.network_handler.send_number_of_screens(self.username, num_screens, "number_of_screens")
                     client_id = self.username
-                    server_ip = "10.0.0.19"
+                    server_ip = "172.16.16.69"
                     server_port = server_port
                     s_client_sock = self.network_handler.send_client_info(client_id, server_ip, server_port)
                     self.screen_clients_sockets.append(s_client_sock)

@@ -2,7 +2,7 @@ import socket
 import threading
 import pickle
 import time
-from scene import Scene
+from master.scene import Scene
 
 clients = []
 texture_parts = [0.0, 1 / 3, 2 / 3, 1.0]

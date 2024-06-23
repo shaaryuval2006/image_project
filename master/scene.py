@@ -60,40 +60,55 @@ class Cube:
             (-1 + delta, -1 + delta, -1 + delta),
             (1 + delta, -1 + delta, 1 + delta),
             (1 + delta, 1 + delta, 1 + delta),
-            (-1 + delta, -1 + delta, 1 + delta),
-            (-1 + delta, 1 + delta, 1 + delta)
+            (-1 + delta, 1 + delta, 1 + delta),
+            (-1 + delta, -1 + delta, 1 + delta)
         )
 
         self.edges = (
-            (0, 1),
-            (0, 3),
-            (0, 4),
-            (2, 1),
-            (2, 3),
-            (2, 7),
-            (6, 3),
-            (6, 4),
-            (6, 7),
-            (5, 1),
-            (5, 4),
-            (5, 7)
+            (0, 1), # 0
+            (1, 2), # 1
+            (2, 3), # 2
+            (3, 0), # 3
+            (4, 5), # 4
+            (5, 6), # 5
+            (6, 7), # 6
+            (7, 4), # 7
+            (0, 4), # 8
+            (1, 5), # 9
+            (2, 6), # 10
+            (3, 7)  # 11
         )
 
         self.faces = (
-            (0, 1, 2, 3),  # Front face
-            (4, 5, 6, 7),  # Back face
-            (0, 1, 5, 4),  # Top face
-            (2, 3, 7, 6),  # Bottom face
-            (1, 2, 7, 5),  # Right face
-            (0, 3, 6, 4)   # Left face
+            ((0, 0), (1, 0), (2, 0), (3, 0)),  # Front face
+            ((4, 0), (5, 0), (6, 0), (7, 0)),  # Back face
+            ((1, 0), (10, 0), (5, 1), (9, 1)),  # Top face
+            ((3, 1), (11, 0), (7, 0), (8, 1)),  # Bottom face
+            ((2, 1), (10, 0), (6, 0), (11, 1)),  # Right face
+            ((0, 0), (9, 0), (4, 1), (8, 1))   # Left face
         )
 
+        self.face_colors = (
+            (1, 0, 0),
+            (0, 1, 1),
+            (0, 0, 1),
+            (0, 0, 1),
+            (0, 1, 1),
+            (1, 0, 1)
+        )
     def draw(self):
 
-        glColor3f(1.0, 0.0, 0.0)
         glBegin(GL_QUADS)
+        i_face = 0
         for face in self.faces:
-            for vertex in face:
+            glColor3f(self.face_colors[i_face][0], self.face_colors[i_face][1], self.face_colors[i_face][2])
+            i_face += 1
+            print(f"face = {face}")
+            for edge_map in face:
+                edge_id, vertex_in_edge = edge_map
+                vertex = self.edges[edge_id][vertex_in_edge]
+                print(f"vertex = {vertex}")
+
                 glVertex3f(self.vertices[vertex][0] + self.translation[0],
                            self.vertices[vertex][1] + self.translation[1],
                            self.vertices[vertex][2] + self.translation[2])
@@ -113,19 +128,37 @@ class Scene:
     def __init__(self, texture_coords =((0, 0), (0, 1), (1, 0), (1, 1)), line_of_sight_angle=0, fov=120):
         self.objs = []
         self.screen = Screen(0, texture_coords)
-        # Position the first cube on the left
-        self.cube1 = Cube(0, translation=(5, 0, 0))
-        # Position the second cube on the right
-        self.cube2 = Cube(0, translation=(-5, 0, 0))
-        self.cube3 = Cube(0, translation=(0, 0, -5))
-        # Position the second cube on the right
-        self.cube4 = Cube(0, translation=(0, 0, 5))
+        translations = (
+            (5, 0, 0),
+            (-5, 0, 0),
+            (10, 0, 0),
+            (-10, 0, 0),
+            (0, 5, 0),
+            (0, -5, 0),
+            (0, 10, 0),
+            (0, -10, 0),
+            (0, 0, 5),
+            (0, 0, -5),
+            (0, 0, 10),
+            (0, 0, -10),
+            (0, 10, 5),
+            (0, 10, -5),
+            (0, 10, 10),
+            (0, 10, -10),
+            (5, 0, 5),
+            (5, 0, -5),
+            (5, 0, 10),
+            (5, 0, -10),
+        )
+        self.cubes = []
+        for t in translations:
+            self.cubes.append(Cube(0, t))
+
 
         self.objs.append(self.screen)
-        self.objs.append(self.cube1)
-        self.objs.append(self.cube2)
-        self.objs.append(self.cube3)
-        self.objs.append(self.cube4)
+        for cube in self.cubes:
+            self.objs.append(cube)
+
         self.line_of_sight_angle = line_of_sight_angle
         self.fov = fov
 

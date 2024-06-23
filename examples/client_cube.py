@@ -6,8 +6,7 @@ from OpenGL.GLU import *
 import socket
 import pickle
 import threading
-import protocol
-from scene import Scene
+from master import protocol
 import numpy as np
 
 def rotate_vector(eye, center, angle_degrees, axis):
