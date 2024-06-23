@@ -37,29 +37,29 @@ class GUI_Window:
         self.master = master
         self.network_handler = NetworkHandler()
         self.master.title("Login Form")
-        self.master.geometry('400x300')
+        self.master.geometry('600x400')
 
         # Initialize username and password variables
         self.username = ""
         self.password = ""
 
-        self.username_label = tk.Label(self.master, text="User Id:", font=("helvetica", 16))
-        self.username_label.place(relx=0.5, rely=0.25, anchor="center")
+        self.username_label = tk.Label(self.master, text="Userid:")
+        self.username_label.place(relx=0.5, rely=0.35, anchor="center")
 
-        self.username_entry = tk.Entry(self.master, font=("helvetica", 16))
-        self.username_entry.place(relx=0.5, rely=0.35, anchor="center")
+        self.username_entry = tk.Entry(self.master)
+        self.username_entry.place(relx=0.5, rely=0.40, anchor="center")
 
-        self.password_label = tk.Label(self.master, text="Password:", font=("helvetica", 16))
+        self.password_label = tk.Label(self.master, text="Password:")
         self.password_label.place(relx=0.5, rely=0.45, anchor="center")
 
-        self.password_entry = tk.Entry(self.master, show="*", font=("helvetica", 16))
-        self.password_entry.place(relx=0.5, rely=0.55, anchor="center")
+        self.password_entry = tk.Entry(self.master, show="*")
+        self.password_entry.place(relx=0.5, rely=0.5, anchor="center")
 
-        self.login_button = tk.Button(self.master, text="Login", command=self.login, font=("helvetica", 16))
-        self.login_button.place(relx=0.65, rely=0.70, anchor="center")
+        self.login_button = tk.Button(self.master, text="Login", command=self.login)
+        self.login_button.place(relx=0.55, rely=0.6, anchor="center")
 
-        self.sign_in_button = tk.Button(self.master, text="Sign In", command=self.sign_in, font=("helvetica", 16))
-        self.sign_in_button.place(relx=0.35, rely=0.70, anchor="center")
+        self.sign_in_button = tk.Button(self.master, text="Sign In", command=self.sign_in)
+        self.sign_in_button.place(relx=0.45, rely=0.6, anchor="center")
 
     def login(self):
         self.username = self.username_entry.get()
@@ -71,7 +71,7 @@ class GUI_Window:
             self.network_handler.send_credentials(self.username, self.password, "sign_in")
             response = self.network_handler.get_response()
             if "Success" in response:
-                messagebox.showinfo("Login", "this username is taken, {}".format(self.username))
+                messagebox.showinfo("Login", "Welcome back, {}".format(self.username))
             else:
                 # If sign-in fails, attempt to register
                 self.network_handler.send_credentials(self.username, self.password, "register")

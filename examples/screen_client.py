@@ -9,6 +9,7 @@ import socket
 import protocol
 from scene import  Scene
 
+
 class SceneDisplayClient:
     def __init__(self):
         self.scene_locker = threading.Lock()

@@ -1,6 +1,7 @@
-from OpenGL.GL import *
-#from OpenGL.GLU import *
+
 from PIL import Image
+from OpenGL.GL import *
+
 
 
 class Screen:
@@ -49,7 +50,6 @@ class Screen:
         glDisable(GL_TEXTURE_2D)
 
 
-
 class Cube:
     def __init__(self, delta, translation=(0, 0, 0)):
         self.translation = translation
@@ -79,7 +79,27 @@ class Cube:
             (5, 7)
         )
 
+        self.faces = (
+            (0, 1, 2, 3),  # Front face
+            (4, 5, 6, 7),  # Back face
+            (0, 1, 5, 4),  # Top face
+            (2, 3, 7, 6),  # Bottom face
+            (1, 2, 7, 5),  # Right face
+            (0, 3, 6, 4)   # Left face
+        )
+
     def draw(self):
+
+        glColor3f(1.0, 0.0, 0.0)
+        glBegin(GL_QUADS)
+        for face in self.faces:
+            for vertex in face:
+                glVertex3f(self.vertices[vertex][0] + self.translation[0],
+                           self.vertices[vertex][1] + self.translation[1],
+                           self.vertices[vertex][2] + self.translation[2])
+        glEnd()
+
+        glColor3f(0.0, 0.0, 1.0)
         glBegin(GL_LINES)
         for edge in self.edges:
             for vertex in edge:
