@@ -102,9 +102,12 @@ class ClientHandler(threading.Thread):
 
                     print(f"message len = {len(message)}")
                     if len(message) == 3:
-                        username, password, choice = message
+                        cmd_params = message
+                        choice = cmd_params[0]
                         db = Database()
                         if choice == "register":  # Register
+                            username = cmd_params[1]
+                            password = cmd_params[2]
                             existing_password = db.get_password(username)
                             if existing_password is None:
                                 db.add_user(username, password)
@@ -115,6 +118,8 @@ class ClientHandler(threading.Thread):
                             else:
                                 response_msg = "Error: Username already exists"
                         elif choice == "sign_in":  # Sign in
+                            username = cmd_params[1]
+                            password = cmd_params[2]
                             stored_password = db.get_password(username)
                             if stored_password == password:
                                 user_id = db.get_user_id(username)
@@ -123,12 +128,13 @@ class ClientHandler(threading.Thread):
                             else:
                                 response_msg = "Error: Incorrect password"
                         elif choice == "add_scene":  # Add scene
+                            username = cmd_params[1]
+                            scene_data = cmd_params[2]
                             response_msg = "Scene added successfully"
-                        elif choice == "get_scenes":  # Get scenes
-                            scenes = db.get_scenes(username)
-                            response_msg = scenes
+
                         elif choice == "number_of_screens":
-                            num_screens = pickle.loads(data)
+                            username = cmd_params[1]
+                            num_screens = pickle.loads(cmd_params[2])
                             print(f"User {username} has {num_screens} screens")
                             self.signed_in_users.append((username, id, num_screens))
                             continue
@@ -140,11 +146,13 @@ class ClientHandler(threading.Thread):
                         message = self.protocol.create_msg(data)
                         self.client_socket.sendall(message)
 
-                    #screen client
                     elif len(message) == 2:
-                        cmd_params  = message
+                        cmd_params = message
 
-                        if cmd_params[0] == "screen_connect":
+                        if cmd_params[0] == "get_scenes":  # Get scenes
+                            scenes = db.get_scenes(username)
+                            response_msg = scenes ###todo!?!
+                        elif cmd_params[0] == "screen_connect":
                             db = Database()
                             client_id = cmd_params[1]
                             i = cmd_params[2]

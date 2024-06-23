@@ -20,13 +20,13 @@ class NetworkHandler:
         self.update = False
 
     def send_credentials(self, username, password, choice):
-        obj = (username, password, choice)
+        obj = (choice, username, password)
         data = pickle.dumps(obj)
         message = self.proto.create_msg(data)
         self.client_socket.sendall(message)
 
     def send_number_of_screens(self, username, num_screens, choice):
-        obj = (username, num_screens, choice)
+        obj = (choice, username, num_screens)
         data = pickle.dumps(obj)
         message = self.proto.create_msg(data)
         self.client_socket.sendall(message)
@@ -78,13 +78,13 @@ class NetworkHandler:
                         print(f"UnpicklingError in handle_scene: {e}")
 
     def store_scene(self, username, scene):
-        obj = (username, "add_scene", pickle.dumps(scene))
+        obj = ("add_scene", username, pickle.dumps(scene))
         data = pickle.dumps(obj)
         message = self.proto.create_msg(data)
         self.client_socket.sendall(message)
 
     def retrieve_scenes(self, username):
-        obj = (username, "get_scenes")
+        obj = ("get_scenes", username)
         data = pickle.dumps(obj)
         message = self.proto.create_msg(data)
         self.client_socket.sendall(message)
