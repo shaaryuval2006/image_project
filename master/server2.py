@@ -31,6 +31,7 @@ class Database:
                           id INTEGER PRIMARY KEY,
                           user_id INTEGER NOT NULL,
                           scene BLOB NOT NULL,
+                          fov FLOAT NOT NULL,
                           timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                           FOREIGN KEY(user_id) REFERENCES users(id))''')
         self.conn.commit()
@@ -52,20 +53,20 @@ class Database:
         result = cursor.fetchone()
         return result[0] if result else None
 
-    def add_scene(self, user_id, scene_data):
+    def add_scene(self, user_id, scene_data, fov):
         cursor = self.conn.cursor()
-        cursor.execute("INSERT INTO scenes (user_id, scene) VALUES (?, ?)", (user_id, scene_data))
+        cursor.execute("INSERT INTO scenes (user_id, scene, fov) VALUES (?, ?, ?)", (user_id, scene_data, fov))
         self.conn.commit()
 
     def get_latest_scene(self, user_id):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT scene FROM scenes WHERE user_id=? ORDER BY timestamp DESC LIMIT 1", (user_id,))
+        cursor.execute("SELECT scene, fov FROM scenes WHERE user_id=? ORDER BY timestamp DESC LIMIT 1", (user_id,))
         result = cursor.fetchone()
-        return result[0] if result else None
+        return result[0], result[1] if result else None
 
     def get_scenes(self, username):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT scene, timestamp FROM scenes WHERE user_id=(SELECT id FROM users WHERE username=?) ORDER BY timestamp DESC", (username,))
+        cursor.execute("SELECT scene, fov, timestamp FROM scenes WHERE user_id=(SELECT id FROM users WHERE username=?) ORDER BY timestamp DESC", (username,))
         return cursor.fetchall()
 
     def close(self):
@@ -92,15 +93,12 @@ class ClientHandler(threading.Thread):
                         print(f"UnpicklingError: {e}")
                         continue
 
-                    #main client
-                    print(message, "this is the message")
                     if not isinstance(message, tuple):
                         print(f"Received an unknown message format: {message}")
                         self.client_socket.sendall(b"Invalid username")
                         self.client_socket.close()
                         return
 
-                    print(f"message len = {len(message)}")
                     if len(message) == 3:
                         username, password, choice = message
                         db = Database()
@@ -110,7 +108,8 @@ class ClientHandler(threading.Thread):
                                 db.add_user(username, password)
                                 user_id = db.get_user_id(username)
                                 default_scene = pickle.dumps(Scene())
-                                db.add_scene(user_id, default_scene)
+                                default_fov = 120.0  # Initial FOV for new users
+                                db.add_scene(user_id, default_scene, default_fov)
                                 response_msg = "User added successfully"
                             else:
                                 response_msg = "Error: Username already exists"
@@ -140,7 +139,6 @@ class ClientHandler(threading.Thread):
                         message = self.protocol.create_msg(data)
                         self.client_socket.sendall(message)
 
-                    #screen client
                     elif len(message) == 2:
                         cmd, data = message
 
@@ -148,15 +146,16 @@ class ClientHandler(threading.Thread):
                             db = Database()
                             client_id = data
 
-                            print("yuval", self.signed_in_users)
                             for user_details in self.signed_in_users:
-                                print(f"user details {user_details}, client_id {client_id}")
                                 if user_details[0] == client_id:
                                     try:
                                         user_id = user_details[1]
-                                        scene_data = db.get_latest_scene(user_id)
-                                        print("eli")
+                                        scene_data, fov = db.get_latest_scene(user_id)
                                         message = self.protocol.create_msg(pickle.dumps(("scene", scene_data)))
+                                        self.client_socket.sendall(message)
+
+                                        # Send FOV information to the screen client
+                                        message = self.protocol.create_msg(pickle.dumps(("fov", fov)))
                                         self.client_socket.sendall(message)
                                     except Exception as e:
                                         print(f"Failed to send scene to screen client: {e}")
@@ -164,7 +163,6 @@ class ClientHandler(threading.Thread):
                                     self.client_socket.sendall(b"Don't Know You")
                                     self.client_socket.close()
                                     return
-                            print(f"Received a message for username: {client_id}")
 
                             db.close()
                     else:
