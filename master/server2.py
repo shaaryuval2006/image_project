@@ -142,11 +142,12 @@ class ClientHandler(threading.Thread):
 
                     #screen client
                     elif len(message) == 2:
-                        cmd, data = message
+                        cmd_params  = message
 
-                        if cmd == "screen_connect":
+                        if cmd_params[0] == "screen_connect":
                             db = Database()
-                            client_id = data
+                            client_id = cmd_params[1]
+                            i = cmd_params[2]
 
                             print("yuval", self.signed_in_users)
                             for user_details in self.signed_in_users:
@@ -156,6 +157,11 @@ class ClientHandler(threading.Thread):
                                         user_id = user_details[1]
                                         scene_data = db.get_latest_scene(user_id)
                                         print("eli")
+                                        scene_data_unpickeld = pickle.loads(scene_data)
+                                        scene_data_unpickeld.fov = 360/num_screens
+                                        scene_data_unpickeld.line_of_sight_angle = scene_data_unpickeld.fov * i
+                                        scene_data = pickle.dumps(scene_data_unpickeld)
+
                                         message = self.protocol.create_msg(pickle.dumps(("scene", scene_data)))
                                         self.client_socket.sendall(message)
                                     except Exception as e:

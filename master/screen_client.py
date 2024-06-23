@@ -15,6 +15,7 @@ class SceneDisplayClient:
         self.scene_locker = threading.Lock()
         self.scene = None
         self.next_scene = None
+        self.whoami = -1
 
         self.display = (800, 600)  # Desired display resolution
         self.rotation_axis = np.array([0, 0, 1])
@@ -62,7 +63,7 @@ class SceneDisplayClient:
     def receive_server_actions(self):
         self.server_socket.connect((self.server_ip, self.server_port))
         self.proto = protocol.Protocol(self.server_socket)
-        message = self.proto.create_msg(pickle.dumps(("screen_connect", self.client_id)))
+        message = self.proto.create_msg(pickle.dumps(("screen_connect", self.client_id, self.whoami)))
         self.server_socket.sendall(message)
 
         while True:
@@ -88,7 +89,7 @@ class SceneDisplayClient:
                 if res:
                     if self.client_id is None or self.server_ip is None or self.server_port is None:
                         client_info = pickle.loads(msg)
-                        self.client_id, self.server_ip, self.server_port = client_info
+                        self.client_id, self.server_ip, self.server_port, self.whoami = client_info
                         print(f"Client ID: {self.client_id}, Server IP: {self.server_ip}, Server Port: {self.server_port}")
 
                         # start thread with server:

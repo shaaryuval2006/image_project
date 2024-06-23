@@ -32,12 +32,16 @@ class NetworkHandler:
         self.client_socket.sendall(message)
 
     def send_client_info(self, client_id, server_ip, server_port, ip_list):
-        obj = (client_id, server_ip, server_port)
-        data = pickle.dumps(obj)
-        message = self.proto.create_msg(data)
 
+
+        i = 0
         screen_clients_sockets = []
         for ip in ip_list:
+            obj = (client_id, server_ip, server_port, i)
+            i += 1
+            data = pickle.dumps(obj)
+            message = self.proto.create_msg(data)
+
             screen_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
                 screen_client_socket.connect((ip, 8889))
@@ -180,6 +184,7 @@ class GUI_Window:
 
     def submit_ips(self, ip_window, ip_entries):
         ip_list = [entry.get() for entry in ip_entries if entry.get()]
+
         if len(ip_list) == len(ip_entries):
             client_id = self.username
             server_ip = "172.16.16.69"
