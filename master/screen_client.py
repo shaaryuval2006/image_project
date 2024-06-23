@@ -69,9 +69,11 @@ class SceneDisplayClient:
         while True:
             res, msg = self.proto.get_msg()
             if res:
+                print(f"res = {res}, msg = {msg}")
                 cmd, data = pickle.loads(msg)
                 if cmd == "scene":
                     scene_data = pickle.loads(data)  # Deserialize the scene data
+                    print(scene_data)
                     if isinstance(scene_data, Scene):
                         with self.scene_locker:
                             self.next_scene = scene_data

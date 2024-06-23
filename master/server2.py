@@ -79,10 +79,12 @@ class ClientHandler(threading.Thread):
         self.protocol = protocol.Protocol(self.client_socket)
         self.signed_in_users = signed_in_users
 
+
     def run(self):
         global id
         print(f"Accepted connection from {self.address}")
         while True:
+            response_msg = None
             try:
                 res, data = self.protocol.get_msg()
                 if res:
@@ -134,26 +136,11 @@ class ClientHandler(threading.Thread):
 
                         elif choice == "number_of_screens":
                             username = cmd_params[1]
-                            num_screens = pickle.loads(cmd_params[2])
+                            num_screens = cmd_params[2]
                             print(f"User {username} has {num_screens} screens")
                             self.signed_in_users.append((username, id, num_screens))
+                            response_msg = None
                             continue
-                        else:
-                            response_msg = "Error: Invalid choice"
-                        db.close()
-
-                        data = pickle.dumps(response_msg)
-                        message = self.protocol.create_msg(data)
-                        self.client_socket.sendall(message)
-
-                    elif len(message) == 2:
-                        cmd_params = message
-
-                        if cmd_params[0] == "get_scenes":  # Get scenes
-                            scenes = db.get_scenes(username)
-                            # mytodo !?!
-                            response_msg = scenes
-
                         elif cmd_params[0] == "screen_connect":
                             db = Database()
                             client_id = cmd_params[1]
@@ -165,24 +152,46 @@ class ClientHandler(threading.Thread):
                                 if user_details[0] == client_id:
                                     try:
                                         user_id = user_details[1]
+                                        num_screens = user_details[2]
                                         scene_data = db.get_latest_scene(user_id)
                                         print("eli")
                                         scene_data_unpickeld = pickle.loads(scene_data)
                                         scene_data_unpickeld.fov = 360/num_screens
                                         scene_data_unpickeld.line_of_sight_angle = scene_data_unpickeld.fov * i
                                         scene_data = pickle.dumps(scene_data_unpickeld)
-
+                                        response_msg = ("scene", scene_data)
                                         message = self.protocol.create_msg(pickle.dumps(("scene", scene_data)))
                                         self.client_socket.sendall(message)
+
                                     except Exception as e:
                                         print(f"Failed to send scene to screen client: {e}")
                                 else:
                                     self.client_socket.sendall(b"Don't Know You")
                                     self.client_socket.close()
+                                    response_msg = None
                                     return
                             print(f"Received a message for username: {client_id}")
+                            response_msg = None
+                        else:
+                            response_msg = "Error: Invalid choice"
 
-                            db.close()
+
+                    elif len(message) == 2:
+                        cmd_params = message
+
+                        if cmd_params[0] == "get_scenes":  # Get scenes
+                            scenes = db.get_scenes(username)
+                            # mytodo !?!
+                            response_msg = scenes
+
+
+
+                    db.close()
+
+                    if response_msg is not None:
+                        data = pickle.dumps(response_msg)
+                        message = self.protocol.create_msg(data)
+                        self.client_socket.sendall(message)
                     else:
                         print(message)
             except (ConnectionResetError, BrokenPipeError):
