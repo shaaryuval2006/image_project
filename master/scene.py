@@ -42,6 +42,7 @@ class Screen:
         glNormal3d(0, 0, 1)
 
         # Updated section: incorporating x_offset
+        glColor3f(0.0, 0.0, 1.0)
         for i in range(4):
             x, y, z = self.base_vertices[i]
             glTexCoord2f(self.texture_coords[i][0], self.texture_coords[i][1])
@@ -53,9 +54,81 @@ class Screen:
         glDisable(GL_TEXTURE_2D)
 
 
+class Cube_X:
+    def __init__(self, delta, translation=(0, 0, 0)):
+        self.translation = translation
+        self.offset_x = 0
+        self.vertices = (
+            (1 + delta, -1 + delta, -1 + delta),
+            (1 + delta, 1 + delta, -1 + delta),
+            (-1 + delta, 1 + delta, -1 + delta),
+            (-1 + delta, -1 + delta, -1 + delta),
+            (1 + delta, -1 + delta, 1 + delta),
+            (1 + delta, 1 + delta, 1 + delta),
+            (-1 + delta, 1 + delta, 1 + delta),
+            (-1 + delta, -1 + delta, 1 + delta)
+        )
+
+        self.edges = (
+            (0, 1), # 0
+            (1, 2), # 1
+            (2, 3), # 2
+            (3, 0), # 3
+            (4, 5), # 4
+            (5, 6), # 5
+            (6, 7), # 6
+            (7, 4), # 7
+            (0, 4), # 8
+            (1, 5), # 9
+            (2, 6), # 10
+            (3, 7)  # 11
+        )
+
+        self.faces = (
+            ((0, 0), (1, 0), (2, 0), (3, 0)),  # Front face
+            ((4, 0), (5, 0), (6, 0), (7, 0)),  # Back face
+            ((1, 0), (10, 0), (5, 1), (9, 1)),  # Top face
+            ((3, 1), (11, 0), (7, 0), (8, 1)),  # Bottom face
+            ((2, 1), (10, 0), (6, 0), (11, 1)),  # Right face
+            ((0, 0), (9, 0), (4, 1), (8, 1))   # Left face
+        )
+
+        self.face_colors = (
+            (1, 0, 0),
+            (0, 1, 1),
+            (0, 0, 1),
+            (0, 0, 1),
+            (0, 1, 1),
+            (1, 0, 1)
+        )
+    def draw(self):
+
+        glBegin(GL_QUADS)
+        i_face = 0
+        for face in self.faces:
+            glColor3f(self.face_colors[i_face][0], self.face_colors[i_face][1], self.face_colors[i_face][2])
+            i_face += 1
+            for edge_map in face:
+                edge_id, vertex_in_edge = edge_map
+                vertex = self.edges[edge_id][vertex_in_edge]
+                glVertex3f(self.vertices[vertex][0] + self.translation[0] + self.offset_x,
+                           self.vertices[vertex][1] + self.translation[1],
+                           self.vertices[vertex][2] + self.translation[2])
+        glEnd()
+
+        glBegin(GL_LINES)
+        for edge in self.edges:
+            for vertex in edge:
+                glVertex3f(self.vertices[vertex][0] + self.translation[0] + self.offset_x,
+                           self.vertices[vertex][1] + self.translation[1],
+                           self.vertices[vertex][2] + self.translation[2])
+        glEnd()
+
+
 class Cube:
     def __init__(self, delta, translation=(0, 0, 0)):
         self.translation = translation
+
         self.vertices = (
             (1 + delta, -1 + delta, -1 + delta),
             (1 + delta, 1 + delta, -1 + delta),
@@ -114,7 +187,6 @@ class Cube:
                            self.vertices[vertex][2] + self.translation[2])
         glEnd()
 
-        glColor3f(0.0, 0.0, 1.0)
         glBegin(GL_LINES)
         for edge in self.edges:
             for vertex in edge:
@@ -161,7 +233,7 @@ class Scene:
         self.screens = []
 
         for t in translations_cube:
-            self.cubes.append(Cube(0, t))
+            self.cubes.append(Cube_X(0, t))
 
         for t in translations_screen:
             self.screens.append(Screen(0, texture_coords, t))
