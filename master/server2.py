@@ -183,8 +183,6 @@ class ClientHandler(threading.Thread):
                             # mytodo !?!
                             response_msg = scenes
 
-
-
                     db.close()
 
                     if response_msg is not None:
