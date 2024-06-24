@@ -5,7 +5,7 @@ from OpenGL.GL import *
 
 
 class Screen:
-    def __init__(self, delta, texture_coords, translation, width_scale=4.5, height_scale=4.5):
+    def __init__(self, delta, texture_coords, translation, width_scale=9, height_scale=9):
         self.translation = translation
         self.delta = delta
         self.width_scale = width_scale

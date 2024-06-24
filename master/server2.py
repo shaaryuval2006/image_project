@@ -95,7 +95,6 @@ class ClientHandler(threading.Thread):
                         continue
 
                     #main client
-                    print(message, "this is the message")
                     if not isinstance(message, tuple):
                         print(f"Received an unknown message format: {message}")
                         self.client_socket.sendall(b"Invalid username")
@@ -193,7 +192,7 @@ class ClientHandler(threading.Thread):
                         message = self.protocol.create_msg(data)
                         self.client_socket.sendall(message)
                     else:
-                        print(message)
+                        print("message")
             except (ConnectionResetError, BrokenPipeError):
                 print(f"Connection lost with {self.address}")
                 break
