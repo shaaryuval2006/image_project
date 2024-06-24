@@ -1,4 +1,3 @@
-# main_client.py
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 import pickle
@@ -32,8 +31,6 @@ class NetworkHandler:
         self.client_socket.sendall(message)
 
     def send_client_info(self, client_id, server_ip, server_port, ip_list):
-
-
         i = 0
         screen_clients_sockets = []
         for ip in ip_list:
@@ -143,7 +140,6 @@ class GUI_Window:
                 self.network_handler.send_credentials(self.username, self.password, "register")
                 response = self.network_handler.get_response()
                 messagebox.showinfo("Registration", response)
-            self.master.withdraw()  # Hide the GUI window
         else:
             messagebox.showerror("Error", "Please enter both username and password.")
 
@@ -184,6 +180,11 @@ class GUI_Window:
 
     def submit_ips(self, ip_window, ip_entries):
         ip_list = [entry.get() for entry in ip_entries if entry.get()]
+
+        # Check for duplicate IP addresses
+        if len(ip_list) != len(set(ip_list)):
+            messagebox.showerror("Error", "Duplicate IP addresses found. Please enter unique IP addresses.")
+            return
 
         if len(ip_list) == len(ip_entries):
             client_id = self.username

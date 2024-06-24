@@ -106,7 +106,6 @@ class Cube:
             for edge_map in face:
                 edge_id, vertex_in_edge = edge_map
                 vertex = self.edges[edge_id][vertex_in_edge]
-
                 glVertex3f(self.vertices[vertex][0] + self.translation[0],
                            self.vertices[vertex][1] + self.translation[1],
                            self.vertices[vertex][2] + self.translation[2])

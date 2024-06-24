@@ -122,6 +122,7 @@ class SceneDisplayClient:
             self.draw_scene()
             pygame.time.wait(100)
 
+
 if __name__ == "__main__":
     viewer = SceneDisplayClient()
     viewer.start_viewer()
