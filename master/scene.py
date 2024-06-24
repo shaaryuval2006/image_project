@@ -17,7 +17,7 @@ class Screen:
             (-self.width_scale / 2 + self.delta, -self.height_scale / 2 + self.delta, -1 + self.delta)
         )
         self.vertices = self.base_vertices
-        self.texture_name = r'..\stitched_image_without_pillow2.png'
+        self.texture_name = r'..\airplain_image.jpg'
         self.texture = Image.open(self.texture_name)
         if self.texture.mode != 'RGBA':
             self.texture = self.texture.convert('RGBA')
@@ -145,17 +145,17 @@ class Scene:
             # (0, 10, -5),
             # (0, 10, 10),
             # (0, 10, -10),
-            (5, 0, 5),
-            (13, 0, -5),
-            (10, 0, 10),
-            (15, 0, -10),
+            (-2, 0, 5),
+            (-3, 0, -5),
+            (-4, 0, 10),
+            (-5, 0, -10),
         )
 
         translations_screen = (
-            (3, 0, 5),
-            (15, 0, -5),
-            (25, 0, 10),
-            (20, 0, -10),
+            (1, 0, 5),
+            (2, 0, -5),
+            (3, 0, 10),
+            (4, 0, -10),
         )
         self.cubes = []
         self.screens = []

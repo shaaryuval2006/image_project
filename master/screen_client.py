@@ -50,6 +50,7 @@ class SceneDisplayClient:
         return False
 
     def draw_scene(self):
+        glEnable(GL_DEPTH_TEST)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
         if self.scene:
