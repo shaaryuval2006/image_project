@@ -5,15 +5,16 @@ from OpenGL.GL import *
 
 
 class Screen:
-    def __init__(self, delta, texture_coords, width_scale=4.5, height_scale=4.5):
+    def __init__(self, delta, texture_coords, translation, width_scale=4.5, height_scale=4.5):
+        self.translation = translation
         self.delta = delta
         self.width_scale = width_scale
         self.height_scale = height_scale
         self.base_vertices = (
-            (self.width_scale / 2 + self.delta-25, -self.height_scale / 2 + self.delta, -1 + self.delta),
-            (self.width_scale / 2 + self.delta-25, self.height_scale / 2 + self.delta, -1 + self.delta),
-            (-self.width_scale / 2 + self.delta-25, self.height_scale / 2 + self.delta, -1 + self.delta),
-            (-self.width_scale / 2 + self.delta-25, -self.height_scale / 2 + self.delta, -1 + self.delta)
+            (self.width_scale / 2 + self.delta, -self.height_scale / 2 + self.delta, -1 + self.delta),
+            (self.width_scale / 2 + self.delta, self.height_scale / 2 + self.delta, -1 + self.delta),
+            (-self.width_scale / 2 + self.delta, self.height_scale / 2 + self.delta, -1 + self.delta),
+            (-self.width_scale / 2 + self.delta, -self.height_scale / 2 + self.delta, -1 + self.delta)
         )
         self.vertices = self.base_vertices
         self.texture_name = r'..\stitched_image_without_pillow2.png'
@@ -44,7 +45,9 @@ class Screen:
         for i in range(4):
             x, y, z = self.base_vertices[i]
             glTexCoord2f(self.texture_coords[i][0], self.texture_coords[i][1])
-            glVertex3f(x + self.x_offset, y, z)
+            glVertex3f(x + self.x_offset + self.translation[0],
+                       y + self.translation[1],
+                       z + self.translation[2])
 
         glEnd()
         glDisable(GL_TEXTURE_2D)
@@ -124,7 +127,7 @@ class Cube:
 class Scene:
     def __init__(self, texture_coords =((0, 0), (0, 1), (1, 0), (1, 1)), line_of_sight_angle=0, fov=120):
         self.objs = []
-        self.screen = Screen(0, texture_coords)
+
         translations = (
             (5, 0, 0),
             (-5, 0, 0),
@@ -148,23 +151,27 @@ class Scene:
             (5, 0, -10),
         )
         self.cubes = []
+        self.screens = []
+
         for t in translations:
             self.cubes.append(Cube(0, t))
+            self.screens.append(Screen(0, texture_coords, t))
 
-
-        self.objs.append(self.screen)
         for cube in self.cubes:
             self.objs.append(cube)
+
+        for screen in self.screens:
+            self.objs.append(screen)
 
         self.line_of_sight_angle = line_of_sight_angle
         self.fov = fov
 
     def draw(self):
         glPushMatrix()
-        #glRotatef(self.rotation_angle, 0, 1, 0)  # Rotate around the Y-axis
+        #glRotatef(10, 0, 1, 0)  # Rotate around the Y-axis
         for obj in self.objs:
             obj.draw()
         glPopMatrix()
 
     def update_x_offset(self, offset):
-        self.screen.x_offset = offset
+        self.screens.x_offset = offset
