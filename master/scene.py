@@ -152,10 +152,10 @@ class Scene:
         )
 
         translations_screen = (
-            (5, 0, 5),
+            (2, 0, 5),
             (5, 0, -5),
-            (5, 0, 10),
-            (5, 0, -10),
+            (7, 0, 10),
+            (11, 0, -10),
         )
         self.cubes = []
         self.screens = []
