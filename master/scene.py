@@ -230,6 +230,10 @@ class Scene:
             # (3, 0, 10),
             # (4, 0, -10),
         )
+
+        translations_cube_stati = (
+            (0, 10, -10),
+        )
         self.cubes = []
         self.screens = []
 
@@ -238,6 +242,9 @@ class Scene:
 
         for t in translations_screen:
             self.screens.append(Screen(0, texture_coords, t))
+
+        for t in translations_cube_stati:
+            self.cubes.append(Cube(0, t))
 
         for cube in self.cubes:
             self.objs.append(cube)
