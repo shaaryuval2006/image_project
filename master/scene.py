@@ -5,7 +5,7 @@ from OpenGL.GL import *
 
 
 class Screen:
-    def __init__(self, delta, texture_coords, translation, width_scale=9, height_scale=9):
+    def __init__(self, delta, texture_coords, translation, width_scale=4.5, height_scale=4.5):
         self.translation = translation
         self.delta = delta
         self.width_scale = width_scale
@@ -133,22 +133,22 @@ class Scene:
             (-5, 0, 0),
             (10, 0, 0),
             (-10, 0, 0),
-            # (0, 5, 0),
-            # (0, -5, 0),
-            # (0, 10, 0),
-            # (0, -10, 0),
-            # (0, 0, 5),
-            # (0, 0, -5),
-            # (0, 0, 10),
-            # (0, 0, -10),
-            # (0, 10, 5),
-            # (0, 10, -5),
-            # (0, 10, 10),
-            # (0, 10, -10),
-            # (5, 0, 5),
-            # (5, 0, -5),
-            # (5, 0, 10),
-            # (5, 0, -10),
+            (0, 5, 0),
+            (0, -5, 0),
+            (0, 10, 0),
+            (0, -10, 0),
+            (0, 0, 5),
+            (0, 0, -5),
+            (0, 0, 10),
+            (0, 0, -10),
+            (0, 10, 5),
+            (0, 10, -5),
+            (0, 10, 10),
+            (0, 10, -10),
+            (5, 0, 5),
+            (5, 0, -5),
+            (5, 0, 10),
+            (5, 0, -10),
         )
         self.cubes = []
         self.screens = []
