@@ -91,8 +91,8 @@ class SceneDisplayClient:
                 if res:
                     if self.client_id is None or self.server_ip is None or self.server_port is None:
                         client_info = pickle.loads(msg)
-                        self.client_id, self.server_ip, self.server_port, self.whoami = client_info
-                        print(f"Client ID: {self.client_id}, Server IP: {self.server_ip}, Server Port: {self.server_port}")
+                        self.client_id, self.server_ip, self.server_port, self.whoami , self.motion = client_info
+                        print(f"Client ID: {self.client_id}, Server IP: {self.server_ip}, Server Port: {self.server_port}, motion = {self.motion}")
 
                         # start thread with server:
                         # 1. Send the client ID to the server

@@ -17,7 +17,7 @@ class Screen:
             (-self.width_scale / 2 + self.delta, -self.height_scale / 2 + self.delta, -1 + self.delta)
         )
         self.vertices = self.base_vertices
-        self.texture_name = r'..\airplain_image.jpg'
+        self.texture_name = r'..\black.jpeg'
         self.texture = Image.open(self.texture_name)
         if self.texture.mode != 'RGBA':
             self.texture = self.texture.convert('RGBA')
@@ -42,7 +42,7 @@ class Screen:
         glNormal3d(0, 0, 1)
 
         # Updated section: incorporating x_offset
-        glColor3f(0.0, 0.0, 1.0)
+        glColor3f(1.0, 1.0, 1.0)
         for i in range(4):
             x, y, z = self.base_vertices[i]
             glTexCoord2f(self.texture_coords[i][0], self.texture_coords[i][1])
@@ -57,7 +57,7 @@ class Screen:
 class Cube_X:
     def __init__(self, delta, translation=(0, 0, 0)):
         self.translation = translation
-        self.offset_x = 0
+        self.offset_x = 1
         self.vertices = (
             (1 + delta, -1 + delta, -1 + delta),
             (1 + delta, 1 + delta, -1 + delta),
@@ -105,6 +105,7 @@ class Cube_X:
 
         glBegin(GL_QUADS)
         i_face = 0
+        self.offset_x += 0.1
         for face in self.faces:
             glColor3f(self.face_colors[i_face][0], self.face_colors[i_face][1], self.face_colors[i_face][2])
             i_face += 1
@@ -224,10 +225,10 @@ class Scene:
         )
 
         translations_screen = (
-            (1, 0, 5),
+            # (1, 0, 5),
             (2, 0, -5),
-            (3, 0, 10),
-            (4, 0, -10),
+            # (3, 0, 10),
+            # (4, 0, -10),
         )
         self.cubes = []
         self.screens = []

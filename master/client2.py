@@ -12,7 +12,7 @@ class NetworkHandler:
     def __init__(self, port):
         global server_port
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect(("172.16.16.69", port))
+        self.client_socket.connect(("10.0.0.19", port))
         self.proto = protocol.Protocol(self.client_socket)
         self.scene = None
         server_port = port
@@ -30,11 +30,11 @@ class NetworkHandler:
         message = self.proto.create_msg(data)
         self.client_socket.sendall(message)
 
-    def send_client_info(self, client_id, server_ip, server_port, ip_list):
+    def send_client_info(self, client_id, server_ip, server_port, ip_list, motion_value):
         i = 0
         screen_clients_sockets = []
         for ip in ip_list:
-            obj = (client_id, server_ip, server_port, i)
+            obj = (client_id, server_ip, server_port, i, motion_value)
             i += 1
             data = pickle.dumps(obj)
             message = self.proto.create_msg(data)
@@ -175,7 +175,8 @@ class GUI_Window:
             entry.pack(pady=5)
             ip_entries.append(entry)
 
-        submit_button = tk.Button(ip_window, text="Submit", command=lambda: self.submit_ips(ip_window, ip_entries), font=("helvetica", 12))
+        submit_button = tk.Button(ip_window, text="Submit", command=lambda: self.submit_ips(ip_window, ip_entries),
+                                  font=("helvetica", 12))
         submit_button.pack(pady=20)
 
     def submit_ips(self, ip_window, ip_entries):
@@ -187,15 +188,28 @@ class GUI_Window:
             return
 
         if len(ip_list) == len(ip_entries):
-            client_id = self.username
-            server_ip = "172.16.16.69"
-            global server_port
-            s_client_sockets = self.network_handler.send_client_info(client_id, server_ip, server_port, ip_list)
-            self.screen_clients_sockets.extend(s_client_sockets)
-            ip_window.destroy()
-            self.master.withdraw()
+            self.ask_for_motion_value(ip_window, ip_list)
         else:
             messagebox.showerror("Error", "Please enter all IP addresses.")
+
+    def ask_for_motion_value(self, ip_window, ip_list):
+        motion_value = simpledialog.askfloat("Motion Value", "Enter the motion value (0 to 1):")
+
+        if motion_value is None:
+            messagebox.showerror("Error", "Motion value entry cancelled.")
+            return
+
+        if not (0 <= motion_value <= 1):
+            messagebox.showerror("Error", "Invalid motion value. Please enter a number between 0 and 1.")
+            return
+
+        client_id = self.username
+        server_ip = "10.0.0.19"
+        global server_port
+        s_client_sockets = self.network_handler.send_client_info(client_id, server_ip, server_port, ip_list, motion_value)
+        self.screen_clients_sockets.extend(s_client_sockets)
+        ip_window.destroy()
+        self.master.withdraw()
 
 
 if __name__ == "__main__":
