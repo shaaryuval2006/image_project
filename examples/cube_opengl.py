@@ -1,8 +1,11 @@
+import time
+
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import numpy as np
+import math
 
 # Define the vertices and edges of the cube
 vertices = [
@@ -29,15 +32,25 @@ def draw_cube():
             glVertex3fv(vertices[vertex])
     glEnd()
 
+def rotate_around_center_lookAt(angle):
+    radius = 5.0  # Radius of the orbit
+    bigradius = math.sqrt(radius*radius+radius*radius)
+    angle_rad = math.radians(angle)
+    eye_x = radius * math.cos(angle_rad)
+    eye_z = radius * math.sin(angle_rad)
+    eye_y = math.sqrt(bigradius*bigradius - eye_x * eye_x - eye_z*eye_z)
+    gluLookAt(0, 0, 0, eye_x, eye_y, eye_z, 0, 1, 0)
+
 def main():
     pygame.init()
     display = (800, 600)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
-    glTranslatef(0.0, 0.0, -5)
+
+
 
     clock = pygame.time.Clock()
-    angle = 0
+    angle = 90
 
     while True:
         for event in pygame.event.get():
@@ -45,13 +58,16 @@ def main():
                 pygame.quit()
                 return
 
-        angle += 1  # Increase the rotation angle
+        glMatrixMode(GL_MODELVIEW)
+        rotate_around_center_lookAt(angle)
+        glTranslatef(0.0, 0.0, -100)
+        angle += 5  # Increase the rotation angle
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glRotatef(angle, 3, 1, 1)  # Rotate the cube around the x, y, and z axes
         draw_cube()
         pygame.display.flip()
-        clock.tick(60)  # Limit to 60 frames per second
+        clock.tick(25)  # Limit to 60 frames per second
 
 
 def main2():
@@ -93,10 +109,10 @@ def main2():
 
         draw_cube()  # Draw the cube
         pygame.display.flip()
-        clock.tick(60)  # Limit to 60 frames per second
-
+        #clock.tick(5)  # Limit to 60 frames per second
+        time.sleep(200)
 
 
 
 if __name__ == "__main__":
-    main2()
+    main()

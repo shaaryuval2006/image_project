@@ -204,11 +204,13 @@ class Cube:
 
 
 class Scene:
-    #                  texture_coords =((0, 0.2), (0.2, 1), (1, 0.8), (0.8, 0))
-    #                  texture_coords =((0, 0), (0, 1), (1, 0), (1, 1))
-    def __init__(self, texture_coords =((0, 0.02), (0.02, 1), (1, 0.98), (0.98, 0)), line_of_sight_angle=0, fov=120):
+    def __init__(self, texture_coords=((0, 0.02), (0.02, 1), (1, 0.98), (0.98, 0)), line_of_sight_angle=0, fov=120):
+        # Initialize objects and other attributes
+        self.cubes = []
+        self.screens = []
         self.objs = []
         self.motion = 0
+        self.visible = False  # Flag to track visibility
 
         translations_cube = (
             # (5, 0, 0),
@@ -252,9 +254,6 @@ class Scene:
         for t in translations_screen:
             self.screens.append(Screen(0, texture_coords, t))
 
-        for t in translations_cube_stati:
-            self.cubes.append(Cube(0, t))
-
         for cube in self.cubes:
             self.objs.append(cube)
 
@@ -265,15 +264,25 @@ class Scene:
         self.fov = fov
 
     def set_motion(self, motion):
-        print(f"new motion = {motion}")
+        self.motion = motion
         for obj in self.objs:
             obj.motion_step = motion
 
     def draw(self):
         glPushMatrix()
-        for obj in self.objs:
-            obj.draw()
+        if self.visible:  # Only draw objects if visible
+            for obj in self.objs:
+                obj.draw()
         glPopMatrix()
+
+    def update_visibility(self, edge_threshold):
+        # Implement logic to update visibility based on object position
+        for screen in self.screens:
+            if screen.offset_x >= edge_threshold:  # Adjust this condition based on your requirements
+                self.visible = True
+                break
+        else:
+            self.visible = False
 
     def update_x_offset(self, offset):
         self.screens.x_offset = offset

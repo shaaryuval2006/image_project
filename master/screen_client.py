@@ -115,15 +115,26 @@ class SceneDisplayClient:
         while True:
             if self.handle_pygame_events():
                 break
-            if self.motion != 0 and self.scene is not None:  # Check if self.scene is not None
+
+            # Update motion and scene
+            if self.motion != 0 and self.scene is not None:
                 self.scene.set_motion(self.motion)
                 self.motion = 0
+
+            # Update next scene
             with self.scene_locker:
                 if self.next_scene is not None:
                     self.scene = self.next_scene
                     self.next_scene = None
-            if self.scene is not None:  # Ensure self.scene is not None before drawing
+
+            # Update visibility based on edge condition
+            if self.scene is not None:
+                self.scene.update_visibility(edge_threshold=35.0)  # Adjust edge threshold as needed
+
+            # Draw scene
+            if self.scene is not None and self.scene.visible:
                 self.draw_scene()
+
             pygame.time.wait(100)
 
 
