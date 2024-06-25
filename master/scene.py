@@ -10,6 +10,9 @@ class Screen:
         self.delta = delta
         self.width_scale = width_scale
         self.height_scale = height_scale
+        self.offset_x = 0
+        self.motion_step = 0
+
         self.base_vertices = (
             (self.width_scale / 2 + self.delta, -self.height_scale / 2 + self.delta, -1 + self.delta),
             (self.width_scale / 2 + self.delta, self.height_scale / 2 + self.delta, -1 + self.delta),
@@ -17,15 +20,16 @@ class Screen:
             (-self.width_scale / 2 + self.delta, -self.height_scale / 2 + self.delta, -1 + self.delta)
         )
         self.vertices = self.base_vertices
-        self.texture_name = r'..\black.jpeg'
+        self.texture_name = r'..\black_air_plain.png'
         self.texture = Image.open(self.texture_name)
         if self.texture.mode != 'RGBA':
             self.texture = self.texture.convert('RGBA')
         self.texture_data = self.texture.tobytes()
         self.texture_coords = texture_coords
-        self.x_offset = 0.1  # Add an offset for the x-axis
+          # Add an offset for the x-axis
 
     def draw(self):
+        self.offset_x += self.motion_step
         texture = glGenTextures(1)
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1)
         glBindTexture(GL_TEXTURE_2D, texture)
@@ -46,7 +50,7 @@ class Screen:
         for i in range(4):
             x, y, z = self.base_vertices[i]
             glTexCoord2f(self.texture_coords[i][0], self.texture_coords[i][1])
-            glVertex3f(x + self.x_offset + self.translation[0],
+            glVertex3f(x + self.offset_x + self.translation[0],
                        y + self.translation[1],
                        z + self.translation[2])
 
@@ -57,7 +61,8 @@ class Screen:
 class Cube_X:
     def __init__(self, delta, translation=(0, 0, 0)):
         self.translation = translation
-        self.offset_x = 1
+        self.offset_x = 0
+        self.motion_step = 0
         self.vertices = (
             (1 + delta, -1 + delta, -1 + delta),
             (1 + delta, 1 + delta, -1 + delta),
@@ -105,7 +110,7 @@ class Cube_X:
 
         glBegin(GL_QUADS)
         i_face = 0
-        self.offset_x += 0.1
+        self.offset_x -= self.motion_step
         for face in self.faces:
             glColor3f(self.face_colors[i_face][0], self.face_colors[i_face][1], self.face_colors[i_face][2])
             i_face += 1
@@ -129,7 +134,8 @@ class Cube_X:
 class Cube:
     def __init__(self, delta, translation=(0, 0, 0)):
         self.translation = translation
-
+        self.offset_x = 0
+        self.motion_step = 0
         self.vertices = (
             (1 + delta, -1 + delta, -1 + delta),
             (1 + delta, 1 + delta, -1 + delta),
@@ -198,8 +204,11 @@ class Cube:
 
 
 class Scene:
-    def __init__(self, texture_coords =((0, 0), (0, 1), (1, 0), (1, 1)), line_of_sight_angle=0, fov=120):
+    #                  texture_coords =((0, 0.2), (0.2, 1), (1, 0.8), (0.8, 0))
+    #                  texture_coords =((0, 0), (0, 1), (1, 0), (1, 1))
+    def __init__(self, texture_coords =((0, 0.02), (0.02, 1), (1, 0.98), (0.98, 0)), line_of_sight_angle=0, fov=120):
         self.objs = []
+        self.motion = 0
 
         translations_cube = (
             # (5, 0, 0),
@@ -255,9 +264,13 @@ class Scene:
         self.line_of_sight_angle = line_of_sight_angle
         self.fov = fov
 
+    def set_motion(self, motion):
+        print(f"new motion = {motion}")
+        for obj in self.objs:
+            obj.motion_step = motion
+
     def draw(self):
         glPushMatrix()
-        #glRotatef(10, 0, 1, 0)  # Rotate around the Y-axis
         for obj in self.objs:
             obj.draw()
         glPopMatrix()

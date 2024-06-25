@@ -12,7 +12,7 @@ class NetworkHandler:
     def __init__(self, port):
         global server_port
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect(("10.0.0.19", port))
+        self.client_socket.connect(("172.16.16.69", port))
         self.proto = protocol.Protocol(self.client_socket)
         self.scene = None
         server_port = port
@@ -199,12 +199,12 @@ class GUI_Window:
             messagebox.showerror("Error", "Motion value entry cancelled.")
             return
 
-        if not (0 <= motion_value <= 1):
-            messagebox.showerror("Error", "Invalid motion value. Please enter a number between 0 and 1.")
+        if not (-1 <= motion_value <= 0):
+            messagebox.showerror("Error", "Invalid motion value. Please enter a number between -1 and 0.")
             return
 
         client_id = self.username
-        server_ip = "10.0.0.19"
+        server_ip = "172.16.16.69"
         global server_port
         s_client_sockets = self.network_handler.send_client_info(client_id, server_ip, server_port, ip_list, motion_value)
         self.screen_clients_sockets.extend(s_client_sockets)

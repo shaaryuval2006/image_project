@@ -24,6 +24,7 @@ class SceneDisplayClient:
         self.client_id = None
         self.server_ip = None
         self.server_port = None
+        self.motion = 0
 
         pygame.init()
         pygame.display.set_mode(self.display, DOUBLEBUF | OPENGL)
@@ -114,12 +115,15 @@ class SceneDisplayClient:
         while True:
             if self.handle_pygame_events():
                 break
-
+            if self.motion != 0 and self.scene is not None:  # Check if self.scene is not None
+                self.scene.set_motion(self.motion)
+                self.motion = 0
             with self.scene_locker:
                 if self.next_scene is not None:
                     self.scene = self.next_scene
                     self.next_scene = None
-            self.draw_scene()
+            if self.scene is not None:  # Ensure self.scene is not None before drawing
+                self.draw_scene()
             pygame.time.wait(100)
 
 
