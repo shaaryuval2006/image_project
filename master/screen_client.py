@@ -53,6 +53,7 @@ class SceneDisplayClient:
     def draw_scene(self):
         glEnable(GL_DEPTH_TEST)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        self.reshape(800,600)
         #glLoadIdentity()
         if self.scene:
             glPushMatrix()
@@ -62,8 +63,8 @@ class SceneDisplayClient:
 
         pygame.display.flip()
 
-    def reshape(w, h):
-        glViewport(0, 0, 800, 600)
+    def reshape(self, w, h):
+        glViewport(0, 0, w, h)
 
     def receive_server_actions(self):
         self.server_socket.connect((self.server_ip, self.server_port))

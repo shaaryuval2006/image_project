@@ -48,7 +48,7 @@ def main():
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(90, (display[0] / display[1]), 0.1, 50.0)
-
+    reshape(200,100)
 
 
     clock = pygame.time.Clock()
@@ -72,7 +72,8 @@ def main():
         pygame.display.flip()
         clock.tick(10)  # Limit to 60 frames per second
 
-
+def reshape(w, h):
+    glViewport(0, 0, w, h)
 def main2():
     pygame.init()
     display = (800, 600)
