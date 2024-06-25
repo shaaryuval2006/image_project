@@ -8,7 +8,7 @@ import pickle
 import socket
 import protocol
 from scene import Scene
-
+import math
 
 class SceneDisplayClient:
     def __init__(self):
@@ -53,10 +53,10 @@ class SceneDisplayClient:
     def draw_scene(self):
         glEnable(GL_DEPTH_TEST)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glLoadIdentity()
+        #glLoadIdentity()
         if self.scene:
             glPushMatrix()
-            glRotatef(self.scene.line_of_sight_angle, self.rotation_axis[0], self.rotation_axis[1], self.rotation_axis[2])
+            #glRotatef(self.scene.line_of_sight_angle, self.rotation_axis[0], self.rotation_axis[1], self.rotation_axis[2])
             self.scene.draw()
             glPopMatrix()
 
@@ -79,6 +79,14 @@ class SceneDisplayClient:
                         with self.scene_locker:
                             self.next_scene = scene_data
 
+    def rotate_around_center_lookAt(self, angle):
+        radius = 5.0  # Radius of the orbit
+        bigradius = math.sqrt(radius * radius + radius * radius)
+        angle_rad = math.radians(angle)
+        eye_x = radius * math.cos(angle_rad)
+        eye_z = radius * math.sin(angle_rad)
+        # eye_y = math.sqrt(bigradius*bigradius - eye_x * eye_x - eye_z*eye_z)
+        gluLookAt(0, 0, 0, -eye_x, 0, -eye_z, 0, 1, 0)
     def receive_main_client_action(self):  # waiting for main client
         screen_server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         screen_server_socket.bind(("0.0.0.0", 8889))
@@ -123,6 +131,13 @@ class SceneDisplayClient:
                     self.scene = self.next_scene
                     self.next_scene = None
             if self.scene is not None:  # Ensure self.scene is not None before drawing
+                glMatrixMode(GL_PROJECTION)
+                glLoadIdentity()
+                gluPerspective(self.scene.fov, (self.display[0] / self.display[1]), 0.1, 50.0)
+
+                glMatrixMode(GL_MODELVIEW)
+                glLoadIdentity()
+                self.rotate_around_center_lookAt(self.scene.line_of_sight_angle)
                 self.draw_scene()
             pygame.time.wait(100)
 

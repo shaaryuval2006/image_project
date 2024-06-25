@@ -64,14 +64,14 @@ class Cube_X:
         self.offset_x = 0
         self.motion_step = 0
         self.vertices = (
-            (1 + delta, -1 + delta, -1 + delta),
-            (1 + delta, 1 + delta, -1 + delta),
-            (-1 + delta, 1 + delta, -1 + delta),
-            (-1 + delta, -1 + delta, -1 + delta),
-            (1 + delta, -1 + delta, 1 + delta),
-            (1 + delta, 1 + delta, 1 + delta),
-            (-1 + delta, 1 + delta, 1 + delta),
-            (-1 + delta, -1 + delta, 1 + delta)
+            (1+ delta, -1, -1 ),
+            (1+ delta, 1, -1 ),
+            (-1+ delta, 1, -1 ),
+            (-1+ delta, -1, -1 ),
+            (1+ delta, -1, 1 ),
+            (1+ delta, 1, 1 ),
+            (-1+ delta, 1, 1 ),
+            (-1+ delta, -1, 1 )
         )
 
         self.edges = (
@@ -137,14 +137,14 @@ class Cube:
         self.offset_x = 0
         self.motion_step = 0
         self.vertices = (
-            (1 + delta, -1 + delta, -1 + delta),
-            (1 + delta, 1 + delta, -1 + delta),
-            (-1 + delta, 1 + delta, -1 + delta),
-            (-1 + delta, -1 + delta, -1 + delta),
-            (1 + delta, -1 + delta, 1 + delta),
-            (1 + delta, 1 + delta, 1 + delta),
-            (-1 + delta, 1 + delta, 1 + delta),
-            (-1 + delta, -1 + delta, 1 + delta)
+            (1 , -1, -1 + delta),
+            (1 , 1 , -1 + delta),
+            (-1 , 1 , -1 + delta),
+            (-1 , -1 , -1 + delta),
+            (1 , -1 , 1 + delta),
+            (1 , 1 , 1 + delta),
+            (-1 , 1 , 1 + delta),
+            (-1 , -1 , 1 + delta)
         )
 
         self.edges = (
@@ -247,13 +247,13 @@ class Scene:
         self.screens = []
 
         for t in translations_cube:
-            self.cubes.append(Cube_X(0, t))
+            self.cubes.append(Cube_X(5, t))
 
         for t in translations_screen:
-            self.screens.append(Screen(0, texture_coords, t))
+            self.screens.append(Screen(5, texture_coords, t))
 
         for t in translations_cube_stati:
-            self.cubes.append(Cube(0, t))
+            self.cubes.append(Cube(5, t))
 
         for cube in self.cubes:
             self.objs.append(cube)
