@@ -40,7 +40,7 @@ class SceneDisplayClient:
         gluPerspective(self.fov, (self.display[0] / self.display[1]), 0.1, 50.0)
         glMatrixMode(GL_MODELVIEW)
 
-        gluLookAt(0, 0, 0, 0, 0, 10, -math.sin(self.scene.line_of_sight_angle), math.cos(self.scene.line_of_sight_angle), 0)  # Initial camera position
+        gluLookAt(0, 0, 0, 0, 0, 10, 0, 0, 1)  # Initial camera position
 
     def handle_pygame_events(self):
         for event in pygame.event.get():
