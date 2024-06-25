@@ -18,7 +18,7 @@ class SceneDisplayClient:
         self.whoami = -1
 
         self.display = (800, 600)  # Desired display resolution
-        self.rotation_axis = np.array([0, 0, 1])
+        self.rotation_axis = np.array([0, 1, 0])
         self.fov = 120  # Initial FOV
 
         self.client_id = None
