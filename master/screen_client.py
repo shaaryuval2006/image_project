@@ -56,11 +56,14 @@ class SceneDisplayClient:
         #glLoadIdentity()
         if self.scene:
             glPushMatrix()
-            #glRotatef(self.scene.line_of_sight_angle, self.rotation_axis[0], self.rotation_axis[1], self.rotation_axis[2])
+            glRotatef(self.scene.line_of_sight_angle, self.rotation_axis[0], self.rotation_axis[1], self.rotation_axis[2])
             self.scene.draw()
             glPopMatrix()
 
         pygame.display.flip()
+
+    def reshape(w, h):
+        glViewport(0, 0, 800, 600)
 
     def receive_server_actions(self):
         self.server_socket.connect((self.server_ip, self.server_port))
