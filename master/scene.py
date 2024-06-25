@@ -14,10 +14,10 @@ class Screen:
         self.motion_step = 0
 
         self.base_vertices = (
-            (self.width_scale / 2 + self.delta, -self.height_scale / 2 + self.delta, -1 + self.delta),
-            (self.width_scale / 2 + self.delta, self.height_scale / 2 + self.delta, -1 + self.delta),
-            (-self.width_scale / 2 + self.delta, self.height_scale / 2 + self.delta, -1 + self.delta),
-            (-self.width_scale / 2 + self.delta, -self.height_scale / 2 + self.delta, -1 + self.delta)
+            (self.width_scale / 2 + self.delta, -self.height_scale / 2, -1),
+            (self.width_scale / 2 + self.delta, self.height_scale / 2, -1),
+            (-self.width_scale / 2 + self.delta, self.height_scale / 2, -1),
+            (-self.width_scale / 2 + self.delta, -self.height_scale / 2, -1)
         )
         self.vertices = self.base_vertices
         self.texture_name = r'..\black_air_plain.png'
@@ -227,9 +227,9 @@ class Scene:
             # (0, 10, -5),
             # (0, 10, 10),
             # (0, 10, -10),
-            (-2, 0, 5),
-            (-3, 0, -5),
-            (-4, 0, 10),
+            # (-2, 0, 5),
+            # (-3, 0, -5),
+            # (-4, 0, 10),
             (-5, 0, -10),
         )
 
@@ -253,7 +253,7 @@ class Scene:
             self.screens.append(Screen(5, texture_coords, t))
 
         for t in translations_cube_stati:
-            self.cubes.append(Cube(5, t))
+            self.cubes.append(Cube(10, t))
 
         for cube in self.cubes:
             self.objs.append(cube)

@@ -48,7 +48,7 @@ def main():
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     gluPerspective(90, (display[0] / display[1]), 0.1, 50.0)
-    reshape(200,100)
+    reshape(400,300)
 
 
     clock = pygame.time.Clock()
