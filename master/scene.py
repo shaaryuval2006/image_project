@@ -1,8 +1,7 @@
 
 from PIL import Image
 from OpenGL.GL import *
-from OpenGL.GLU import *
-import math
+
 
 
 class Screen:
@@ -41,8 +40,7 @@ class Screen:
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, self.texture.width, self.texture.height, 0,
                      GL_RGBA, GL_UNSIGNED_BYTE, self.texture_data)
         glGenerateMipmap(GL_TEXTURE_2D)
-
-        #glRotate(self.lin,0,0, 0)
+        glRotate(20,0,0, 0)
         glEnable(GL_TEXTURE_2D)
         glBegin(GL_QUADS)
         glNormal3d(0, 0, 1)
@@ -273,8 +271,6 @@ class Scene:
 
     def draw(self):
         glPushMatrix()
-        gluLookAt(0, 0, 0, 0, 0, 10, -math.sin(self.line_of_sight_angle),
-                  math.cos(self.line_of_sight_angle), 0)  # Initial camera position
         for obj in self.objs:
             obj.draw()
         glPopMatrix()

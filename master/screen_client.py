@@ -8,7 +8,6 @@ import pickle
 import socket
 import protocol
 from scene import Scene
-import math
 
 
 class SceneDisplayClient:
@@ -39,8 +38,7 @@ class SceneDisplayClient:
         glMatrixMode(GL_PROJECTION)
         gluPerspective(self.fov, (self.display[0] / self.display[1]), 0.1, 50.0)
         glMatrixMode(GL_MODELVIEW)
-
-        gluLookAt(0, 0, 0, 0, 0, 10, 0, 0, 1)  # Initial camera position
+        gluLookAt(0, 0, 0, 0, 0, 10, 0, 1, 0)  # Initial camera position
 
     def handle_pygame_events(self):
         for event in pygame.event.get():
@@ -58,7 +56,7 @@ class SceneDisplayClient:
         glLoadIdentity()
         if self.scene:
             glPushMatrix()
-            #glRotatef(self.scene.line_of_sight_angle, self.rotation_axis[0], self.rotation_axis[1], self.rotation_axis[2])
+            glRotatef(self.scene.line_of_sight_angle, self.rotation_axis[0], self.rotation_axis[1], self.rotation_axis[2])
             self.scene.draw()
             glPopMatrix()
 
